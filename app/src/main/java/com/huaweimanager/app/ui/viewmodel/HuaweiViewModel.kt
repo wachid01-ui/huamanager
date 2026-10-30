@@ -1,0 +1,271 @@
+package com.huaweimanager.app.ui.viewmodel
+
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.huaweimanager.app.data.api.HiLinkApiClient
+import com.huaweimanager.app.data.model.DeviceInfo
+import com.huaweimanager.app.data.model.NetworkStatus
+import com.huaweimanager.app.data.model.SignalInfo
+import com.huaweimanager.app.data.model.SmsMessage
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+
+class HuaweiViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val prefs = application.getSharedPreferences("huawei_manager_prefs", Context.MODE_PRIVATE)
+
+    val apiClient = HiLinkApiClient(
+        baseUrl = prefs.getString("router_ip", "http://192.168.8.1") ?: "http://192.168.8.1"
+    )
+
+    private val _routerIp = MutableStateFlow(prefs.getString("router_ip", "192.168.8.1") ?: "192.168.8.1")
+    val routerIp: StateFlow<String> = _routerIp.asStateFlow()
+
+    private val _signalInfo = MutableStateFlow(SignalInfo())
+    val signalInfo: StateFlow<SignalInfo> = _signalInfo.asStateFlow()
+
+    private val _networkStatus = MutableStateFlow(NetworkStatus())
+    val networkStatus: StateFlow<NetworkStatus> = _networkStatus.asStateFlow()
+
+    private val _deviceInfo = MutableStateFlow(DeviceInfo())
+    val deviceInfo: StateFlow<DeviceInfo> = _deviceInfo.asStateFlow()
+
+    private val _smsList = MutableStateFlow<List<SmsMessage>>(emptyList())
+    val smsList: StateFlow<List<SmsMessage>> = _smsList.asStateFlow()
+
+    private val _isConnected = MutableStateFlow(false)
+    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
+    private val _isLoggedIn = MutableStateFlow(false)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val _isAutoRefresh = MutableStateFlow(true)
+    val isAutoRefresh: StateFlow<Boolean> = _isAutoRefresh.asStateFlow()
+
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
+
+    private val _ussdResponse = MutableStateFlow<String?>(null)
+    val ussdResponse: StateFlow<String?> = _ussdResponse.asStateFlow()
+
+    private var pollingJob: Job? = null
+
+    init {
+        testConnectionAndStart()
+    }
+
+    fun setRouterIp(newIp: String) {
+        val cleanIp = newIp.replace("http://", "").replace("https://", "").trim()
+        _routerIp.value = cleanIp
+        prefs.edit().putString("router_ip", cleanIp).apply()
+        apiClient.updateBaseUrl(cleanIp)
+        testConnectionAndStart()
+    }
+
+    fun testConnectionAndStart() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val conn = apiClient.testConnection()
+            _isConnected.value = conn.isSuccess
+            if (conn.isSuccess) {
+                refreshSignalAndStatus()
+                loadDeviceInfo()
+                if (_isAutoRefresh.value) {
+                    startAutoRefresh()
+                }
+            } else {
+                _toastMessage.value = "Tidak dapat terhubung ke modem di ${_routerIp.value}"
+            }
+            _isRefreshing.value = false
+        }
+    }
+
+    fun toggleAutoRefresh() {
+        val next = !_isAutoRefresh.value
+        _isAutoRefresh.value = next
+        if (next) {
+            startAutoRefresh()
+        } else {
+            pollingJob?.cancel()
+            pollingJob = null
+        }
+    }
+
+    private fun startAutoRefresh() {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            while (isActive) {
+                refreshSignalAndStatus()
+                delay(2500)
+            }
+        }
+    }
+
+    suspend fun refreshSignalAndStatus() {
+        val signalResult = apiClient.getSignalInfo()
+        if (signalResult.isSuccess) {
+            _signalInfo.value = signalResult.getOrThrow()
+            _isConnected.value = true
+        }
+
+        val netResult = apiClient.getNetworkStatus()
+        if (netResult.isSuccess) {
+            _networkStatus.value = netResult.getOrThrow()
+        }
+    }
+
+    fun manualRefresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            refreshSignalAndStatus()
+            _isRefreshing.value = false
+        }
+    }
+
+    fun loadDeviceInfo() {
+        viewModelScope.launch {
+            val res = apiClient.getDeviceInfo()
+            if (res.isSuccess) {
+                _deviceInfo.value = res.getOrThrow()
+            }
+        }
+    }
+
+    fun login(password: String, username: String = "admin", onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val result = apiClient.login(username, password)
+            _isRefreshing.value = false
+            if (result.isSuccess) {
+                _isLoggedIn.value = true
+                _toastMessage.value = "Login berhasil!"
+                onResult(true)
+            } else {
+                _toastMessage.value = result.exceptionOrNull()?.message ?: "Login gagal"
+                onResult(false)
+            }
+        }
+    }
+
+    fun lockBand(hexMask: String, bandName: String) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val res = apiClient.setLteBand(hexMask, networkMode = if (hexMask == "7FFFFFFFFFFFFFFF") "00" else "03")
+            _isRefreshing.value = false
+            if (res.isSuccess) {
+                _toastMessage.value = "Berhasil mengunci ke $bandName"
+                delay(1500)
+                refreshSignalAndStatus()
+            } else {
+                _toastMessage.value = res.exceptionOrNull()?.message ?: "Gagal mengunci band"
+            }
+        }
+    }
+
+    fun rebootRouter(onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val res = apiClient.rebootRouter()
+            _isRefreshing.value = false
+            if (res.isSuccess) {
+                _toastMessage.value = "Modem sedang reboot..."
+                onComplete(true)
+            } else {
+                _toastMessage.value = res.exceptionOrNull()?.message ?: "Gagal reboot"
+                onComplete(false)
+            }
+        }
+    }
+
+    fun toggleMobileData(enable: Boolean) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val res = apiClient.setMobileData(enable)
+            _isRefreshing.value = false
+            if (res.isSuccess) {
+                _toastMessage.value = if (enable) "Data seluler diaktifkan" else "Data seluler dimatikan"
+                refreshSignalAndStatus()
+            } else {
+                _toastMessage.value = "Gagal mengubah status data"
+            }
+        }
+    }
+
+    fun loadSms() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val res = apiClient.getSmsList()
+            _isRefreshing.value = false
+            if (res.isSuccess) {
+                _smsList.value = res.getOrThrow()
+            } else {
+                _toastMessage.value = "Gagal memuat SMS (Pastikan sudah login)"
+            }
+        }
+    }
+
+    fun sendSms(phone: String, content: String, onDone: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            val res = apiClient.sendSms(phone, content)
+            _isRefreshing.value = false
+            if (res.isSuccess) {
+                _toastMessage.value = "SMS berhasil terkirim"
+                onDone(true)
+                loadSms()
+            } else {
+                _toastMessage.value = "Gagal mengirim SMS"
+                onDone(false)
+            }
+        }
+    }
+
+    fun deleteSms(index: Int) {
+        viewModelScope.launch {
+            val res = apiClient.deleteSms(index)
+            if (res.isSuccess) {
+                _toastMessage.value = "SMS berhasil dihapus"
+                loadSms()
+            } else {
+                _toastMessage.value = "Gagal menghapus SMS"
+            }
+        }
+    }
+
+    fun sendUssd(code: String) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            _ussdResponse.value = "Menghubungi operator..."
+            val res = apiClient.sendUssd(code)
+            _isRefreshing.value = false
+            if (res.isSuccess) {
+                _ussdResponse.value = res.getOrThrow()
+            } else {
+                _ussdResponse.value = res.exceptionOrNull()?.message ?: "Gagal eksekusi USSD"
+            }
+        }
+    }
+
+    fun clearToast() {
+        _toastMessage.value = null
+    }
+
+    fun clearUssd() {
+        _ussdResponse.value = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        pollingJob?.cancel()
+    }
+}
