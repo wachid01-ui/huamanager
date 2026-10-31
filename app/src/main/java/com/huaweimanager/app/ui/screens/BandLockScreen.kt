@@ -50,6 +50,7 @@ import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.CardBorder
 import com.huaweimanager.app.ui.theme.DarkBackground
 import com.huaweimanager.app.ui.theme.SignalExcellent
+import com.huaweimanager.app.ui.theme.SignalGood
 import androidx.compose.material.icons.filled.Warning
 import com.huaweimanager.app.ui.theme.SignalPoor
 import com.huaweimanager.app.ui.theme.TextMuted
