@@ -22,6 +22,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.screens.BandLockScreen
 import com.huaweimanager.app.ui.screens.DashboardScreen
 import com.huaweimanager.app.ui.screens.SmsScreen
@@ -60,8 +62,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val appTheme by viewModel.appTheme.collectAsState()
-            HuaweiManagerTheme(themeMode = appTheme) {
-                MainAppScreen(viewModel = viewModel)
+            val appLanguage by viewModel.appLanguage.collectAsState()
+
+            CompositionLocalProvider(LocalAppStrings provides appLanguage.strings) {
+                HuaweiManagerTheme(themeMode = appTheme) {
+                    MainAppScreen(viewModel = viewModel)
+                }
             }
         }
     }
@@ -72,13 +78,14 @@ fun MainAppScreen(viewModel: HuaweiViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
     val toastMessage by viewModel.toastMessage.collectAsState()
+    val S = LocalAppStrings.current
 
     val navItems = listOf(
-        NavItem("Sinyal", Icons.Default.SignalCellularAlt),
-        NavItem("Tower", Icons.Default.CellTower),
-        NavItem("Kunci Band", Icons.Default.Lock),
-        NavItem("SMS", Icons.Default.Email),
-        NavItem("Alat", Icons.Default.Build)
+        NavItem(S.navSignal, Icons.Default.SignalCellularAlt),
+        NavItem(S.navTower, Icons.Default.CellTower),
+        NavItem(S.navBandLock, Icons.Default.Lock),
+        NavItem(S.navSms, Icons.Default.Email),
+        NavItem(S.navTools, Icons.Default.Build)
     )
 
     LaunchedEffect(toastMessage) {

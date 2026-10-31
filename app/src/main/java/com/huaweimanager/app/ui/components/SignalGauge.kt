@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huaweimanager.app.data.model.SignalQualityLevel
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.theme.CardBorder
 import com.huaweimanager.app.ui.theme.SignalExcellent
 import com.huaweimanager.app.ui.theme.SignalFair
@@ -36,6 +37,7 @@ fun SignalGauge(
     quality: SignalQualityLevel,
     modifier: Modifier = Modifier
 ) {
+    val S = LocalAppStrings.current
     // Normalizing RSRP: -130dBm (0%) to -65dBm (100%)
     val targetProgress = if (rsrpValue != null) {
         val clamped = rsrpValue.coerceIn(-130, -65)
@@ -61,11 +63,11 @@ fun SignalGauge(
     val trackColor = CardBorder
 
     val qualityLabel = when (quality) {
-        SignalQualityLevel.EXCELLENT -> "SANGAT BAIK"
-        SignalQualityLevel.GOOD -> "BAIK"
-        SignalQualityLevel.FAIR -> "CUKUP"
-        SignalQualityLevel.POOR -> "LEMAH / BURUK"
-        SignalQualityLevel.UNKNOWN -> "MENCARI..."
+        SignalQualityLevel.EXCELLENT -> S.qualityExcellent
+        SignalQualityLevel.GOOD -> S.qualityGood
+        SignalQualityLevel.FAIR -> S.qualityFair
+        SignalQualityLevel.POOR -> S.qualityPoor
+        SignalQualityLevel.UNKNOWN -> S.qualitySearching
     }
 
     Box(

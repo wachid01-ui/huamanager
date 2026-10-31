@@ -9,6 +9,7 @@ import com.huaweimanager.app.data.model.DeviceInfo
 import com.huaweimanager.app.data.model.NetworkStatus
 import com.huaweimanager.app.data.model.SignalInfo
 import com.huaweimanager.app.data.model.SmsMessage
+import com.huaweimanager.app.ui.i18n.AppLanguage
 import com.huaweimanager.app.ui.theme.AppThemeMode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,6 +49,21 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
     fun setAppTheme(theme: AppThemeMode) {
         _appTheme.value = theme
         prefs.edit().putString("app_theme", theme.name).apply()
+    }
+
+    private val savedLangStr = prefs.getString("app_language", AppLanguage.INDONESIAN.name) ?: AppLanguage.INDONESIAN.name
+    private val initialLang = try {
+        AppLanguage.valueOf(savedLangStr)
+    } catch (e: Exception) {
+        AppLanguage.INDONESIAN
+    }
+
+    private val _appLanguage = MutableStateFlow(initialLang)
+    val appLanguage: StateFlow<AppLanguage> = _appLanguage.asStateFlow()
+
+    fun setAppLanguage(lang: AppLanguage) {
+        _appLanguage.value = lang
+        prefs.edit().putString("app_language", lang.name).apply()
     }
 
     private val _loginError = MutableStateFlow<String?>(null)

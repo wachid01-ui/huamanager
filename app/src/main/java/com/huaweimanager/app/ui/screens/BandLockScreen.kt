@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huaweimanager.app.data.model.LteBand
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.CardBorder
@@ -63,6 +64,7 @@ fun BandLockScreen(
     viewModel: HuaweiViewModel,
     modifier: Modifier = Modifier
 ) {
+    val S = LocalAppStrings.current
     val signal by viewModel.signalInfo.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -95,13 +97,13 @@ fun BandLockScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Band Aktif Saat Ini",
+                            text = S.activeBandLabel,
                             fontSize = 12.sp,
                             color = TextMuted
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = if (signal.band.isNotEmpty() && signal.band != "-") "Band ${signal.band} (${signal.dlFrequency})" else "Otomatis / Belum terdeteksi",
+                            text = if (signal.band.isNotEmpty() && signal.band != "-") "Band ${signal.band} (${signal.dlFrequency})" else "Auto",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = AccentPrimary
@@ -137,7 +139,7 @@ fun BandLockScreen(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Kunci Band memerlukan autentikasi. Buka tab 'Alat' untuk memasukkan password admin modem dan login terlebih dahulu.",
+                            text = S.bandLockAuthRequired,
                             color = SignalPoor,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
@@ -353,7 +355,7 @@ fun BandLockScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Terapkan Pilihan Kustom",
+                    text = S.lockSelectedBandsBtn,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp
                 )

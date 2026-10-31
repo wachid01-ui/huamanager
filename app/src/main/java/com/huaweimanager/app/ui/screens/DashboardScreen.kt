@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.huaweimanager.app.data.model.SignalQualityLevel
 import com.huaweimanager.app.ui.components.MetricCard
 import com.huaweimanager.app.ui.components.SignalGauge
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.CardBorder
@@ -62,6 +63,7 @@ fun DashboardScreen(
     viewModel: HuaweiViewModel,
     modifier: Modifier = Modifier
 ) {
+    val S = LocalAppStrings.current
     val signal by viewModel.signalInfo.collectAsState()
     val netStatus by viewModel.networkStatus.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
@@ -152,7 +154,7 @@ fun DashboardScreen(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = if (isConnected) "ONLINE" else "OFFLINE",
+                                    text = if (isConnected) S.connected.uppercase() else S.disconnected.uppercase(),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isConnected) SignalExcellent else SignalPoor
@@ -203,7 +205,7 @@ fun DashboardScreen(
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.Refresh,
-                                    contentDescription = "Refresh",
+                                    contentDescription = S.refresh,
                                     tint = AccentPrimary
                                 )
                             }
@@ -239,27 +241,27 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     MetricCard(
-                        label = "SINR (Noise Ratio)",
+                        label = S.signalMetricSINR,
                         value = signal.sinr.replace("dB", "").trim(),
                         unit = "dB",
                         statusColor = sinrColor,
                         statusText = when {
                             sinrVal == null -> null
-                            sinrVal >= 13 -> "Bagus"
-                            sinrVal >= 0 -> "Cukup"
-                            else -> "Banyak Noise"
+                            sinrVal >= 13 -> S.noiseGood
+                            sinrVal >= 0 -> S.noiseFair
+                            else -> S.noisePoor
                         },
                         modifier = Modifier.weight(1f)
                     )
                     MetricCard(
-                        label = "RSRQ (Kualitas)",
+                        label = S.signalMetricRSRQ,
                         value = signal.rsrq.replace("dB", "").trim(),
                         unit = "dB",
                         statusColor = rsrqColor,
                         statusText = when {
                             rsrqVal == null -> null
-                            rsrqVal >= -10 -> "Stabil"
-                            else -> "Fluktuatif"
+                            rsrqVal >= -10 -> S.signalGood
+                            else -> S.signalFair
                         },
                         modifier = Modifier.weight(1f)
                     )
@@ -270,13 +272,13 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     MetricCard(
-                        label = "RSSI (Daya Total)",
+                        label = S.signalMetricRSSI,
                         value = signal.rssi.replace("dBm", "").trim(),
                         unit = "dBm",
                         modifier = Modifier.weight(1f)
                     )
                     MetricCard(
-                        label = "LTE BAND",
+                        label = S.signalMetricBand,
                         value = if (signal.band.isNotEmpty() && signal.band != "-") "B${signal.band}" else "-",
                         unit = signal.dlFrequency,
                         statusColor = AccentPrimary,
@@ -289,12 +291,12 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     MetricCard(
-                        label = "PCI (Physical Cell ID)",
+                        label = S.signalMetricPCI,
                         value = signal.pci,
                         modifier = Modifier.weight(1f)
                     )
                     MetricCard(
-                        label = "eNodeB / CELL ID",
+                        label = S.signalMetricCellId,
                         value = signal.getCalculatedEnodebId()?.let { "eNB $it" } ?: signal.cellId,
                         modifier = Modifier.weight(1f)
                     )
@@ -319,13 +321,13 @@ fun DashboardScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Auto Refresh Real-time",
+                            text = "Auto Refresh",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Update sinyal setiap 2.5 detik",
+                            text = if (isAutoRefresh) S.autoRefreshActive else S.autoRefreshPaused,
                             fontSize = 12.sp,
                             color = TextSecondary
                         )

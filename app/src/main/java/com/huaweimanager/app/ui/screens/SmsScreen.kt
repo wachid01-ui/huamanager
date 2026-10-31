@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huaweimanager.app.data.model.SmsMessage
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.CardBorder
@@ -65,6 +66,7 @@ fun SmsScreen(
     viewModel: HuaweiViewModel,
     modifier: Modifier = Modifier
 ) {
+    val S = LocalAppStrings.current
     val smsList by viewModel.smsList.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     var showComposeDialog by remember { mutableStateOf(false) }
@@ -102,13 +104,13 @@ fun SmsScreen(
             ) {
                 Column {
                     Text(
-                        text = "Kotak Masuk SMS",
+                        text = S.smsTitle,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Text(
-                        text = "${smsList.size} Pesan di kartu SIM modem",
+                        text = "${smsList.size} ${S.inboxSubtitle}",
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -117,7 +119,7 @@ fun SmsScreen(
                 IconButton(onClick = { viewModel.loadSms() }) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Muat Ulang SMS",
+                        contentDescription = S.refresh,
                         tint = AccentPrimary
                     )
                 }
@@ -139,16 +141,10 @@ fun SmsScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Belum ada SMS",
+                            text = S.noSmsMessages,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextSecondary
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Tekan refresh atau login untuk melihat pesan SIM",
-                            fontSize = 12.sp,
-                            color = TextMuted
                         )
                     }
                 }
@@ -186,6 +182,7 @@ private fun SmsItemCard(
     sms: SmsMessage,
     onDelete: () -> Unit
 ) {
+    val S = LocalAppStrings.current
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     Box(
@@ -203,7 +200,7 @@ private fun SmsItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = sms.phone.ifEmpty { "Pengirim Tidak Dikenal" },
+                    text = sms.phone.ifEmpty { "Unknown" },
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = AccentPrimary
@@ -236,7 +233,7 @@ private fun SmsItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Hapus",
+                        contentDescription = S.deleteSmsBtn,
                         tint = SignalPoor,
                         modifier = Modifier.size(18.dp)
                     )
@@ -249,8 +246,8 @@ private fun SmsItemCard(
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             containerColor = CardBackground,
-            title = { Text(text = "Hapus SMS?", color = TextPrimary) },
-            text = { Text(text = "Pesan ini akan dihapus permanen dari SIM card modem.", color = TextSecondary) },
+            title = { Text(text = "${S.deleteSmsBtn} SMS?", color = TextPrimary) },
+            text = { Text(text = "SIM card modem", color = TextSecondary) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -258,12 +255,12 @@ private fun SmsItemCard(
                         showDeleteConfirm = false
                     }
                 ) {
-                    Text(text = "Hapus", color = SignalPoor, fontWeight = FontWeight.Bold)
+                    Text(text = S.deleteSmsBtn, color = SignalPoor, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text(text = "Batal", color = TextSecondary)
+                    Text(text = S.cancel, color = TextSecondary)
                 }
             }
         )
@@ -275,6 +272,7 @@ private fun ComposeSmsDialog(
     onDismiss: () -> Unit,
     onSend: (phone: String, content: String) -> Unit
 ) {
+    val S = LocalAppStrings.current
     var phone by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
 
@@ -283,7 +281,7 @@ private fun ComposeSmsDialog(
         containerColor = CardBackground,
         title = {
             Text(
-                text = "Kirim SMS Baru",
+                text = S.sendSmsCardTitle,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -294,7 +292,7 @@ private fun ComposeSmsDialog(
                 OutlinedTextField(
                     value = phone,
                     onValueChange = { phone = it },
-                    label = { Text("Nomor Tujuan (contoh: 3636 atau 0812...)") },
+                    label = { Text(S.recipientPhoneLabel) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = TextPrimary,
@@ -310,7 +308,7 @@ private fun ComposeSmsDialog(
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    label = { Text("Isi Pesan") },
+                    label = { Text(S.messageContentLabel) },
                     minLines = 3,
                     maxLines = 5,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -337,12 +335,12 @@ private fun ComposeSmsDialog(
             ) {
                 Icon(imageVector = Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Kirim", fontWeight = FontWeight.Bold)
+                Text(S.sendSmsBtn, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Batal", color = TextSecondary)
+                Text(S.cancel, color = TextSecondary)
             }
         }
     )

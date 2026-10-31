@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.SignalCellularAlt
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -63,6 +64,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huaweimanager.app.ui.i18n.AppLanguage
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.AppThemeMode
 import com.huaweimanager.app.ui.theme.CardBackground
@@ -80,6 +83,7 @@ fun ToolsScreen(
     viewModel: HuaweiViewModel,
     modifier: Modifier = Modifier
 ) {
+    val S = LocalAppStrings.current
     val routerIp by viewModel.routerIp.collectAsState()
     val routerUsername by viewModel.routerUsername.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
@@ -89,6 +93,7 @@ fun ToolsScreen(
     val ussdResponse by viewModel.ussdResponse.collectAsState()
     val savedPassword by viewModel.savedPassword.collectAsState()
     val appTheme by viewModel.appTheme.collectAsState()
+    val appLanguage by viewModel.appLanguage.collectAsState()
 
     var inputIp by remember(routerIp) { mutableStateOf(routerIp) }
     var inputUsername by remember(routerUsername) { mutableStateOf(routerUsername) }
@@ -108,7 +113,7 @@ fun ToolsScreen(
         // Section: Router Connection & Login
         item {
             Text(
-                text = "Koneksi & Autentikasi Modem",
+                text = S.connectionAuthTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -130,14 +135,14 @@ fun ToolsScreen(
                     OutlinedTextField(
                         value = inputIp,
                         onValueChange = { inputIp = it },
-                        label = { Text("IP Gateway Modem (Default: 192.168.8.1)") },
+                        label = { Text(S.gatewayIpLabel) },
                         leadingIcon = {
                             Icon(Icons.Default.Router, contentDescription = null, tint = AccentPrimary)
                         },
                         trailingIcon = {
                             if (inputIp != routerIp) {
                                 TextButton(onClick = { viewModel.setRouterIp(inputIp) }) {
-                                    Text("Simpan", color = AccentPrimary, fontWeight = FontWeight.Bold)
+                                    Text(S.save, color = AccentPrimary, fontWeight = FontWeight.Bold)
                                 }
                             }
                         },
@@ -157,7 +162,7 @@ fun ToolsScreen(
                     OutlinedTextField(
                         value = inputUsername,
                         onValueChange = { inputUsername = it },
-                        label = { Text("Username WebUI Modem (Default: admin)") },
+                        label = { Text(S.usernameLabel) },
                         leadingIcon = {
                             Icon(Icons.Default.AccountCircle, contentDescription = null, tint = AccentPrimary)
                         },
@@ -177,7 +182,7 @@ fun ToolsScreen(
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Password Admin WebUI Modem") },
+                        label = { Text(S.passwordLabel) },
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = AccentPrimary)
                         },
@@ -185,7 +190,7 @@ fun ToolsScreen(
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = if (passwordVisible) "Sembunyikan password" else "Lihat password",
+                                    contentDescription = if (passwordVisible) S.hidePasswordDesc else S.showPasswordDesc,
                                     tint = AccentPrimary
                                 )
                             }
@@ -248,7 +253,7 @@ fun ToolsScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isLoggedIn) "Status: Sudah Login" else "Status: Belum Login",
+                                text = if (isLoggedIn) S.statusLoggedIn else S.statusNotLoggedIn,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = if (isLoggedIn) SignalExcellent else TextMuted
@@ -274,7 +279,7 @@ fun ToolsScreen(
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
-                                        text = "Logout",
+                                        text = S.logoutBtn,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -290,7 +295,7 @@ fun ToolsScreen(
                                 shape = RoundedCornerShape(10.dp)
                             ) {
                                 Text(
-                                    text = if (isRefreshing) "Memproses..." else if (isLoggedIn) "Login Ulang" else "Login",
+                                    text = if (isRefreshing) S.processing else if (isLoggedIn) S.reloginBtn else S.loginBtn,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -320,18 +325,14 @@ fun ToolsScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Petunjuk Penggunaan Login Modem",
+                            text = S.tipsTitle,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = AccentPrimary
                         )
                     }
                     Text(
-                        text = "1. Pastikan HP Android Anda terhubung ke jaringan WiFi modem Huawei (bukan data seluler HP).\n" +
-                               "2. Password admin modem biasanya tercantum di stiker bawah router atau password WebUI yang Anda buat saat pertama kali aktivasi.\n" +
-                               "3. Gunakan ikon mata pada kolom password untuk memastikan huruf besar/kecil (kapital) dan simbol sudah sesuai tanpa salah ketik.\n" +
-                               "4. Aplikasi otomatis menyimpan sesi login sehingga Anda tetap login setiap kali membuka aplikasi sampai menekan tombol Logout.\n" +
-                               "5. Setelah status 'Sudah Login', Anda dapat mengunci frekuensi (Band Locking), membaca/kirim SMS, dan restart router.",
+                        text = "${S.tip1}\n${S.tip2}\n${S.tip3}\n${S.tip4}\n${S.tip5}",
                         fontSize = 11.sp,
                         color = TextSecondary,
                         lineHeight = 16.sp
@@ -343,7 +344,7 @@ fun ToolsScreen(
         // Section: Ganti Tema Aplikasi
         item {
             Text(
-                text = "Tema Tampilan Aplikasi",
+                text = S.themeSectionTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -374,13 +375,13 @@ fun ToolsScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(
-                                text = "Pilih Gaya & Warna Tema",
+                                text = S.themeSectionSubtitle,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextPrimary
                             )
                             Text(
-                                text = "Tema aktif: ${appTheme.title}",
+                                text = "${S.activeThemePrefix} ${appTheme.title}",
                                 fontSize = 12.sp,
                                 color = AccentPrimary,
                                 fontWeight = FontWeight.Medium
@@ -452,7 +453,7 @@ fun ToolsScreen(
                                                     .padding(horizontal = 5.dp, vertical = 1.dp)
                                             ) {
                                                 Text(
-                                                    text = "Terang",
+                                                    text = "Light",
                                                     fontSize = 9.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = AccentPrimary
@@ -500,10 +501,121 @@ fun ToolsScreen(
             }
         }
 
+        // Section: Bahasa Aplikasi / Language
+        item {
+            Text(
+                text = S.languageSectionTitle,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextSecondary,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(CardBackground)
+                    .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Translate,
+                            contentDescription = null,
+                            tint = AccentPrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = S.languageSectionSubtitle,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Text(
+                                text = "${S.activeLanguagePrefix} ${appLanguage.title} ${appLanguage.flagEmoji}",
+                                fontSize = 12.sp,
+                                color = AccentPrimary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    AppLanguage.values().forEach { lang ->
+                        val isSelected = appLanguage == lang
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (isSelected) AccentPrimary.copy(alpha = 0.12f)
+                                    else CardBorder.copy(alpha = 0.25f)
+                                )
+                                .border(
+                                    width = if (isSelected) 1.5.dp else 1.dp,
+                                    color = if (isSelected) AccentPrimary else CardBorder,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .clickable { viewModel.setAppLanguage(lang) }
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = lang.flagEmoji,
+                                    fontSize = 24.sp
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = lang.title,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isSelected) AccentPrimary else TextPrimary
+                                    )
+                                    Text(
+                                        text = lang.nativeName,
+                                        fontSize = 11.sp,
+                                        color = TextSecondary
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = { viewModel.setAppLanguage(lang) },
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = AccentPrimary,
+                                    unselectedColor = TextMuted
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // Section: Router Actions
         item {
             Text(
-                text = "Kontrol Modem",
+                text = S.modemControlsTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -534,7 +646,7 @@ fun ToolsScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Reboot Modem", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(S.rebootBtn, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
 
                 // Toggle Mobile Data
@@ -556,7 +668,7 @@ fun ToolsScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Aktifkan Data", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(S.mobileDataBtn, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 }
             }
         }
@@ -564,7 +676,7 @@ fun ToolsScreen(
         // Section: USSD Tool
         item {
             Text(
-                text = "Dial USSD (Cek Pulsa / Kuota)",
+                text = S.ussdTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -590,7 +702,7 @@ fun ToolsScreen(
                         OutlinedTextField(
                             value = ussdCode,
                             onValueChange = { ussdCode = it },
-                            label = { Text("Kode USSD (contoh: *888# atau *363#)") },
+                            label = { Text(S.ussdCodeLabel) },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = TextPrimary,
@@ -615,7 +727,7 @@ fun ToolsScreen(
                         ) {
                             Icon(Icons.Default.PhoneForwarded, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Panggil", fontWeight = FontWeight.Bold)
+                            Text(S.ussdCallBtn, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -635,13 +747,13 @@ fun ToolsScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Hasil USSD:",
+                                        text = S.ussdResultTitle,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = AccentPrimary
                                     )
                                     TextButton(onClick = { viewModel.clearUssd() }) {
-                                        Text("Tutup", fontSize = 11.sp, color = TextMuted)
+                                        Text(S.close, fontSize = 11.sp, color = TextMuted)
                                     }
                                 }
                                 Text(
@@ -659,7 +771,7 @@ fun ToolsScreen(
         // Section: Device Information
         item {
             Text(
-                text = "Informasi Perangkat",
+                text = S.deviceInfoTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -677,13 +789,13 @@ fun ToolsScreen(
                     .padding(16.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DeviceInfoRow("Tipe Modem", deviceInfo.deviceName)
-                    DeviceInfoRow("Versi Firmware", deviceInfo.softwareVersion)
-                    DeviceInfoRow("Versi WebUI", deviceInfo.webUIVersion)
-                    DeviceInfoRow("Versi Hardware", deviceInfo.hardwareVersion)
-                    DeviceInfoRow("IMEI", deviceInfo.imei)
-                    DeviceInfoRow("IMSI", deviceInfo.imsi)
-                    DeviceInfoRow("MAC Address", deviceInfo.macAddress1)
+                    DeviceInfoRow(S.deviceInfoModel, deviceInfo.deviceName)
+                    DeviceInfoRow(S.deviceInfoFirmware, deviceInfo.softwareVersion)
+                    DeviceInfoRow(S.deviceInfoWebUi, deviceInfo.webUIVersion)
+                    DeviceInfoRow(S.deviceInfoHardware, deviceInfo.hardwareVersion)
+                    DeviceInfoRow(S.deviceInfoImei, deviceInfo.imei)
+                    DeviceInfoRow(S.deviceInfoImsi, deviceInfo.imsi)
+                    DeviceInfoRow(S.deviceInfoMac, deviceInfo.macAddress1)
                 }
             }
         }
@@ -693,10 +805,10 @@ fun ToolsScreen(
         AlertDialog(
             onDismissRequest = { showRebootConfirm = false },
             containerColor = CardBackground,
-            title = { Text("Reboot Modem Huawei?", color = TextPrimary) },
+            title = { Text(S.rebootConfirmTitle, color = TextPrimary) },
             text = {
                 Text(
-                    "Modem akan dimatikan dan dinyalakan ulang. Koneksi internet WiFi akan terputus sementara selama 1-2 menit.",
+                    S.rebootConfirmMsg,
                     color = TextSecondary
                 )
             },
@@ -706,12 +818,12 @@ fun ToolsScreen(
                         viewModel.rebootRouter { showRebootConfirm = false }
                     }
                 ) {
-                    Text("Reboot Sekarang", color = SignalPoor, fontWeight = FontWeight.Bold)
+                    Text(S.confirm, color = SignalPoor, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRebootConfirm = false }) {
-                    Text("Batal", color = TextSecondary)
+                    Text(S.cancel, color = TextSecondary)
                 }
             }
         )

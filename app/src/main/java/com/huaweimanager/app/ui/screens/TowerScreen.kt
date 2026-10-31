@@ -63,6 +63,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huaweimanager.app.ui.i18n.LocalAppStrings
 import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.CardBorder
@@ -81,6 +82,7 @@ fun TowerScreen(
     viewModel: HuaweiViewModel,
     modifier: Modifier = Modifier
 ) {
+    val S = LocalAppStrings.current
     val signal by viewModel.signalInfo.collectAsState()
     val netStatus by viewModel.networkStatus.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
@@ -120,13 +122,13 @@ fun TowerScreen(
             ) {
                 Column {
                     Text(
-                        text = "Pelacak Menara BTS & Cell ID",
+                        text = S.towerInfoTitle,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Text(
-                        text = "Identifikasi menara pemancar & arah antena modem",
+                        text = S.towerSubtitle,
                         fontSize = 12.sp,
                         color = TextMuted
                     )
@@ -138,7 +140,7 @@ fun TowerScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
+                        contentDescription = S.refresh,
                         tint = AccentPrimary
                     )
                 }
@@ -171,9 +173,9 @@ fun TowerScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(SignalExcellent)
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(SignalExcellent)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
@@ -185,7 +187,7 @@ fun TowerScreen(
                         }
 
                         Text(
-                            text = if (isConnected) "Terhubung Aktif" else "Terputus",
+                            text = if (isConnected) S.connected else S.disconnected,
                             fontSize = 11.sp,
                             color = if (isConnected) SignalExcellent else SignalPoor,
                             fontWeight = FontWeight.Medium
@@ -216,12 +218,12 @@ fun TowerScreen(
 
                         Column {
                             Text(
-                                text = "eNodeB ID (ID Menara BTS)",
+                                text = S.enodebIdLabel,
                                 fontSize = 12.sp,
                                 color = TextMuted
                             )
                             Text(
-                                text = if (enodebId != null) "$enodebId" else if (signal.cellId.isNotEmpty() && signal.cellId != "-") signal.cellId else "Mencari Tower...",
+                                text = if (enodebId != null) "$enodebId" else if (signal.cellId.isNotEmpty() && signal.cellId != "-") signal.cellId else S.qualitySearching,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = TextPrimary,
@@ -230,7 +232,7 @@ fun TowerScreen(
                             if (sectorId != null) {
                                 val physicalSector = signal.getPhysicalSectorNumber()
                                 Text(
-                                    text = "Sektor Fisik: Sektor $physicalSector  •  LCID: $sectorId",
+                                    text = "${S.physicalSectorLabel}: Sektor $physicalSector  •  LCID: $sectorId",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = SignalGood
@@ -245,15 +247,15 @@ fun TowerScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TowerInfoBadge(
-                            label = "Cell ID (ECI)",
+                            label = S.signalMetricCellId,
                             value = if (eciDec != null) "$eciDec" else signal.cellId,
                             subValue = signal.getEciHex(),
                             modifier = Modifier.weight(1f)
                         )
                         TowerInfoBadge(
-                            label = "Local Cell ID (LCID)",
+                            label = "${S.localCellIdLabel} (LCID)",
                             value = if (sectorId != null) "$sectorId" else "-",
-                            subValue = "Sektor Fisik: Sektor ${signal.getPhysicalSectorNumber()}",
+                            subValue = "${S.physicalSectorLabel}: Sektor ${signal.getPhysicalSectorNumber()}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -263,13 +265,13 @@ fun TowerScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         TowerInfoBadge(
-                            label = "Band LTE Aktif",
+                            label = S.activeBandLabel,
                             value = if (signal.band.isNotEmpty() && signal.band != "-") "Band ${signal.band}" else "-",
                             subValue = "EARFCN: ${signal.earfcn}",
                             modifier = Modifier.weight(1f)
                         )
                         TowerInfoBadge(
-                            label = "PCI (Physical Cell)",
+                            label = S.signalMetricPCI,
                             value = signal.pci,
                             subValue = "Frekuensi: ${signal.dlFrequency}",
                             modifier = Modifier.weight(1f)
@@ -287,7 +289,7 @@ fun TowerScreen(
                             modifier = Modifier.weight(1f)
                         )
                         TowerInfoBadge(
-                            label = "Kekuatan Sinyal (RSRP)",
+                            label = S.signalMetricRSRP,
                             value = signal.rsrp,
                             subValue = "SINR: ${signal.sinr} | RSRQ: ${signal.rsrq}",
                             modifier = Modifier.weight(1f)
@@ -317,7 +319,7 @@ fun TowerScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Arah Sektor Antena Pemancar (Azimuth)",
+                            text = S.antennaAzimuthTitle,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -325,7 +327,7 @@ fun TowerScreen(
                     }
 
                     Text(
-                        text = "Menara BTS 4G umumnya membagi pancaran ke dalam 3 sektor antena fisik (sudut 120°):",
+                        text = S.antennaAzimuthSubtitle,
                         fontSize = 11.sp,
                         color = TextSecondary
                     )
@@ -339,21 +341,21 @@ fun TowerScreen(
                         SectorTile(
                             sectorTitle = "Sektor 1",
                             degrees = "0° – 120°",
-                            direction = "Utara / Timur Laut",
+                            direction = S.directionNorth,
                             isActive = physicalSectorNum == 1,
                             modifier = Modifier.weight(1f)
                         )
                         SectorTile(
                             sectorTitle = "Sektor 2",
                             degrees = "120° – 240°",
-                            direction = "Tenggara / Selatan",
+                            direction = S.directionEast,
                             isActive = physicalSectorNum == 2,
                             modifier = Modifier.weight(1f)
                         )
                         SectorTile(
                             sectorTitle = "Sektor 3",
                             degrees = "240° – 360°",
-                            direction = "Barat Laut / Barat",
+                            direction = S.directionWest,
                             isActive = physicalSectorNum == 3,
                             modifier = Modifier.weight(1f)
                         )
@@ -361,11 +363,16 @@ fun TowerScreen(
 
                     // Helpful advice
                     Text(
-                        text = "💡 Panduan Arah: " + signal.getSectorAzimuthDescription() +
+                        text = "💡 ${S.towerAdviceHeader}: " + signal.getSectorAzimuthDescription() +
                                 (if (sectorId != null && sectorId > 3) "\nℹ️ Info Sektor: Angka $sectorId adalah Local Cell ID (LCID) operator. Operator seluler memakai seri 100-an untuk membedakan frekuensi/carrier ke-3, yang secara fisik mengarah ke Sektor $physicalSectorNum." else "") +
-                                "\nArahkan antena luar (Yagi/LPDA) lurus ke arah sektor ini untuk memperoleh SINR tertinggi.",
+                                "\n${S.towerAdviceNote}",
                         fontSize = 11.sp,
                         color = TextMuted,
+                        lineHeight = 15.sp
+                    )
+                }
+            }
+        }
                         lineHeight = 15.sp
                     )
                 }
@@ -406,12 +413,12 @@ fun TowerScreen(
 
                         Column {
                             Text(
-                                text = "Perkiraan Letak Menara BTS:",
+                                text = S.estimatedTowerDirTitle,
                                 fontSize = 11.sp,
                                 color = TextMuted
                             )
                             Text(
-                                text = "Di sebelah ${signal.getEstimatedTowerBearing()} rumah Anda",
+                                text = "${S.towerAdviceIntro} ${signal.getEstimatedTowerBearing()}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = SignalExcellent
@@ -436,14 +443,14 @@ fun TowerScreen(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Rekomendasi Arah Pointing Antena:",
+                                    text = S.towerAdviceHeader,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = AccentPrimary
                                 )
                             }
                             Text(
-                                text = "Arahkan moncong antena luar (Yagi/LPDA/Grid) menghadap ke arah ${signal.getEstimatedTowerBearing()} agar berhadapan lurus dengan pancaran Sektor ${signal.getPhysicalSectorNumber()}${if (sectorId != null && sectorId > 3) " (LCID $sectorId)" else ""}.",
+                                text = "${S.towerAdvicePointing} ${signal.getEstimatedTowerBearing()} (Sektor ${signal.getPhysicalSectorNumber()}${if (sectorId != null && sectorId > 3) " / LCID $sectorId" else ""}).",
                                 fontSize = 11.sp,
                                 color = TextPrimary,
                                 lineHeight = 16.sp
@@ -457,7 +464,7 @@ fun TowerScreen(
         // Section: Map Links & Action Tools
         item {
             Text(
-                text = "Navigasi & Pencarian Lokasi Menara",
+                text = S.openCellMapperBtn,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -475,7 +482,7 @@ fun TowerScreen(
                         try {
                             context.startActivity(intent)
                         } catch (e: Exception) {
-                            Toast.makeText(context, "Tidak dapat membuka browser", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Browser error", Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier
@@ -494,7 +501,7 @@ fun TowerScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Buka Peta Menara di CellMapper.net",
+                        text = S.openCellMapperBtn,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )
@@ -517,7 +524,7 @@ fun TowerScreen(
                             try {
                                 context.startActivity(intent)
                             } catch (e: Exception) {
-                                Toast.makeText(context, "Tidak dapat membuka peta", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Maps error", Toast.LENGTH_SHORT).show()
                             }
                         },
                         modifier = Modifier
@@ -562,7 +569,7 @@ fun TowerScreen(
                                 appendLine("CellMapper    : ${signal.getCellMapperUrl()}")
                             }
                             clipboard.setText(AnnotatedString(copyText))
-                            Toast.makeText(context, "Data tower berhasil disalin!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, S.copied, Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier
                             .weight(1f)
@@ -581,7 +588,7 @@ fun TowerScreen(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Salin Info", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        Text(S.copy, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -607,7 +614,7 @@ fun TowerScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Kalkulator Manual Cell ID / eNodeB",
+                            text = S.manualCellIdCalcTitle,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -615,7 +622,7 @@ fun TowerScreen(
                     }
 
                     Text(
-                        text = "Masukkan angka Cell ID (ECI) manual untuk mencari ID BTS & sektornya:",
+                        text = S.manualCellIdCalcSubtitle,
                         fontSize = 11.sp,
                         color = TextSecondary
                     )
@@ -628,7 +635,7 @@ fun TowerScreen(
                         OutlinedTextField(
                             value = calcInputCellId,
                             onValueChange = { calcInputCellId = it },
-                            placeholder = { Text("Contoh: 20188417 atau 0x1340B01", fontSize = 12.sp) },
+                            placeholder = { Text(S.manualCellIdInputLabel, fontSize = 12.sp) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text,
@@ -660,7 +667,7 @@ fun TowerScreen(
                                 } else {
                                     calcResultEnb = null
                                     calcResultSector = null
-                                    Toast.makeText(context, "Format Cell ID tidak valid", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, S.invalidCellIdError, Toast.LENGTH_SHORT).show()
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -669,7 +676,7 @@ fun TowerScreen(
                             ),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Hitung", fontWeight = FontWeight.Bold)
+                            Text(S.calculateBtn, fontWeight = FontWeight.Bold)
                         }
                     }
 
@@ -685,9 +692,9 @@ fun TowerScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text(text = "Hasil Perhitungan:", fontSize = 11.sp, color = TextMuted)
+                                Text(text = S.calcResultTitle, fontSize = 11.sp, color = TextMuted)
                                 Text(
-                                    text = "eNodeB ID: $enb",
+                                    text = "${S.calcResultEnodeB} $enb",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SignalExcellent
@@ -706,7 +713,7 @@ fun TowerScreen(
                                     else -> 1
                                 }
                                 Text(
-                                    text = "Sektor Fisik: Sektor $phys  •  LCID: $lcid",
+                                    text = "${S.physicalSectorLabel}: Sektor $phys  •  LCID: $lcid",
                                     fontSize = 13.sp,
                                     color = SignalGood
                                 )
