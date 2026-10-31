@@ -28,6 +28,12 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
     private val _routerIp = MutableStateFlow(prefs.getString("router_ip", "192.168.8.1") ?: "192.168.8.1")
     val routerIp: StateFlow<String> = _routerIp.asStateFlow()
 
+    private val _routerUsername = MutableStateFlow(prefs.getString("router_username", "admin") ?: "admin")
+    val routerUsername: StateFlow<String> = _routerUsername.asStateFlow()
+
+    private val _loginError = MutableStateFlow<String?>(null)
+    val loginError: StateFlow<String?> = _loginError.asStateFlow()
+
     private val _signalInfo = MutableStateFlow(SignalInfo())
     val signalInfo: StateFlow<SignalInfo> = _signalInfo.asStateFlow()
 
@@ -141,17 +147,31 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun login(password: String, username: String = "admin", onResult: (Boolean) -> Unit) {
+    fun setRouterUsername(username: String) {
+        val clean = username.trim()
+        _routerUsername.value = clean
+        prefs.edit().putString("router_username", clean).apply()
+    }
+
+    fun login(password: String, username: String = _routerUsername.value, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
             _isRefreshing.value = true
+            _loginError.value = null
+            setRouterUsername(username)
             val result = apiClient.login(username, password)
             _isRefreshing.value = false
             if (result.isSuccess) {
                 _isLoggedIn.value = true
+                _loginError.value = null
                 _toastMessage.value = "Login berhasil!"
+                loadDeviceInfo()
+                refreshSignalAndStatus()
                 onResult(true)
             } else {
-                _toastMessage.value = result.exceptionOrNull()?.message ?: "Login gagal"
+                _isLoggedIn.value = false
+                val err = result.exceptionOrNull()?.message ?: "Login gagal"
+                _loginError.value = err
+                _toastMessage.value = err
                 onResult(false)
             }
         }

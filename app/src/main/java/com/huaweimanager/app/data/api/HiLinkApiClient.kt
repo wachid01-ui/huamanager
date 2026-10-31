@@ -60,9 +60,14 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                 requestBuilder.header("__RequestVerificationToken", currentToken)
             }
 
-            // Attach SessionID cookie if available
+            // Attach SessionID cookie properly without duplicate prefix
             if (currentSession.isNotEmpty()) {
-                requestBuilder.addHeader("Cookie", "SessionID=$currentSession")
+                val cookieVal = if (currentSession.startsWith("SessionID=")) {
+                    currentSession
+                } else {
+                    "SessionID=$currentSession"
+                }
+                requestBuilder.header("Cookie", cookieVal)
             }
 
             requestBuilder.header("X-Requested-With", "XMLHttpRequest")
@@ -73,8 +78,18 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             // Update verification token if router returns a fresh one in headers
             val newToken = response.header("__RequestVerificationToken")
                 ?: response.header("__RequestVerificationTokenone")
+                ?: response.header("__RequestVerificationTokentwo")
             if (!newToken.isNullOrEmpty()) {
                 currentToken = newToken
+            }
+
+            // Track SessionID cookie from Set-Cookie header if provided
+            val setCookie = response.header("Set-Cookie")
+            if (!setCookie.isNullOrEmpty() && setCookie.contains("SessionID=")) {
+                val match = Regex("SessionID=([^;]+)").find(setCookie)
+                match?.let {
+                    currentSession = it.value
+                }
             }
 
             response
@@ -156,23 +171,43 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
     }
 
     /**
-     * Authenticate with the router
+     * Authenticate with the router supporting both modern SCRAM-SHA-256 and standard HiLink
      */
     suspend fun login(username: String = "admin", password: String): Result<Boolean> = withContext(Dispatchers.IO) {
         try {
             refreshTokens()
 
-            // 1. Try modern challenge_login first (B311, B312, B535, Orbit Star)
+            // Step 0: Check current login status from router
+            try {
+                val checkStateReq = Request.Builder()
+                    .url("$baseUrl/api/user/state-login")
+                    .get()
+                    .build()
+                val checkStateRes = client.newCall(checkStateReq).execute()
+                val stateBody = checkStateRes.body?.string() ?: ""
+                val currentState = extractXmlTag(stateBody, "State")
+                if (currentState == "0") {
+                    isLoggedIn = true
+                    return@withContext Result.success(true)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "State login check skipped: ${e.message}")
+            }
+
+            // Step 1: Try modern SCRAM challenge_login first (B311, B312, B535, Orbit Star, SoyeaLink)
+            val clientNonce = generateRandomHex(32) // 32 bytes = 64 hex characters
+            val challengeXml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <request>
+                    <username>$username</username>
+                    <firstnonce>$clientNonce</firstnonce>
+                    <mode>1</mode>
+                </request>
+            """.trimIndent()
+
             val challengeRequest = Request.Builder()
                 .url("$baseUrl/api/user/challenge_login")
-                .post("""
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <request>
-                        <username>$username</username>
-                        <firstnonce>c167d402123456781234567812345678</firstnonce>
-                        <mode>1</mode>
-                    </request>
-                """.trimIndent().toRequestBody(XML_MEDIA_TYPE))
+                .post(challengeXml.toRequestBody(XML_MEDIA_TYPE))
                 .build()
 
             val challengeResponse = client.newCall(challengeRequest).execute()
@@ -182,19 +217,23 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                 val salt = extractXmlTag(challengeBody, "salt")
                 val iterations = extractXmlTag(challengeBody, "iterations").toIntOrNull() ?: 100
                 val serverNonce = extractXmlTag(challengeBody, "servernonce")
-                val authMsg = "c167d402123456781234567812345678,$serverNonce,$serverNonce"
+                
+                // Huawei SCRAM AuthMessage: clientNonce,serverNonce,serverNonce
+                val authMsg = "$clientNonce,$serverNonce,$serverNonce"
                 val clientProof = HuaweiCrypto.computeScramClientProof(password, salt, iterations, authMsg)
 
                 if (clientProof.isNotEmpty()) {
+                    val authXml = """
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <request>
+                            <clientproof>$clientProof</clientproof>
+                            <finalnonce>$serverNonce</finalnonce>
+                        </request>
+                    """.trimIndent()
+
                     val authRequest = Request.Builder()
                         .url("$baseUrl/api/user/authentication_login")
-                        .post("""
-                            <?xml version="1.0" encoding="UTF-8"?>
-                            <request>
-                                <clientproof>$clientProof</clientproof>
-                                <finalnonce>$serverNonce</finalnonce>
-                            </request>
-                        """.trimIndent().toRequestBody(XML_MEDIA_TYPE))
+                        .post(authXml.toRequestBody(XML_MEDIA_TYPE))
                         .build()
 
                     val authResponse = client.newCall(authRequest).execute()
@@ -202,11 +241,16 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                     if (authBody.contains("<response>OK</response>")) {
                         isLoggedIn = true
                         return@withContext Result.success(true)
+                    } else {
+                        val errMsg = parseHuaweiErrorMessage(authBody, "Password admin modem salah.")
+                        return@withContext Result.failure(Exception(errMsg))
                     }
+                } else {
+                    return@withContext Result.failure(Exception("Gagal menghitung pembuktian SCRAM enkripsi."))
                 }
             }
 
-            // 2. Standard HiLink login (B310, B315, E5577, E5573)
+            // Step 2: Standard HiLink login (B310, B315, E5577, E5573)
             refreshTokens()
             val passwordHash = HuaweiCrypto.createHiLinkPassword(username, password, currentToken)
             val loginXml = """
@@ -229,12 +273,40 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             if (loginBody.contains("<response>OK</response>")) {
                 isLoggedIn = true
                 return@withContext Result.success(true)
-            } else {
-                val errCode = extractXmlTag(loginBody, "code")
-                return@withContext Result.failure(Exception("Login gagal. Kode error router: $errCode"))
             }
+
+            // Step 3: Fallback for older routers (password_type 0)
+            val errCode = extractXmlTag(loginBody, "code")
+            if (errCode == "100002" || errCode == "100003") {
+                refreshTokens()
+                val plainBase64Pw = android.util.Base64.encodeToString(password.toByteArray(), android.util.Base64.NO_WRAP)
+                val fallbackXml = """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <request>
+                        <Username>$username</Username>
+                        <Password>$plainBase64Pw</Password>
+                        <password_type>0</password_type>
+                    </request>
+                """.trimIndent()
+
+                val fallbackRequest = Request.Builder()
+                    .url("$baseUrl/api/user/login")
+                    .post(fallbackXml.toRequestBody(XML_MEDIA_TYPE))
+                    .build()
+
+                val fallbackResponse = client.newCall(fallbackRequest).execute()
+                val fallbackBody = fallbackResponse.body?.string() ?: ""
+                if (fallbackBody.contains("<response>OK</response>")) {
+                    isLoggedIn = true
+                    return@withContext Result.success(true)
+                }
+            }
+
+            val friendlyMsg = parseHuaweiErrorMessage(loginBody, "Login gagal.")
+            Result.failure(Exception(friendlyMsg))
         } catch (e: Exception) {
-            Result.failure(e)
+            val netError = e.message ?: "Koneksi terputus"
+            Result.failure(Exception("Gagal menghubungi modem ($netError). Pastikan HP terhubung ke WiFi router."))
         }
     }
 
@@ -685,6 +757,28 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             matcher.group(1)?.trim() ?: ""
         } else {
             ""
+        }
+    }
+
+    private fun generateRandomHex(byteCount: Int): String {
+        val bytes = ByteArray(byteCount)
+        java.security.SecureRandom().nextBytes(bytes)
+        return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    fun parseHuaweiErrorMessage(xml: String, defaultMsg: String): String {
+        val code = extractXmlTag(xml, "code")
+        return when (code) {
+            "108001", "108006", "108007" -> "Password admin salah. Silakan periksa kembali password WebUI modem Anda."
+            "108002" -> "Pengguna sudah login sebelumnya."
+            "108003" -> "Akun modem terkunci sementara karena terlalu banyak percobaan salah. Tunggu beberapa menit."
+            "100002" -> "Perintah tidak didukung oleh model modem ini."
+            "100003" -> "Akses ditolak (Token sesi kedaluwarsa). Silakan coba lagi."
+            "100004" -> "Sistem modem sedang sibuk. Silakan tunggu beberapa saat."
+            "100005" -> "Format data request tidak valid."
+            "100006" -> "Parameter modem tidak valid."
+            "100008" -> "Modem memerlukan verifikasi ulang."
+            else -> if (code.isNotEmpty()) "$defaultMsg (Kode Error: $code)" else defaultMsg
         }
     }
 }

@@ -34,6 +34,9 @@ object HuaweiCrypto {
 
     /**
      * Compute SCRAM-SHA-256 Client Proof for modern Huawei routers (e.g., Orbit Star 2/B312/B535)
+     * NOTE: Huawei routers swap the HMAC key/data parameters compared to RFC 5802:
+     * - ClientKey = HMAC(key="Client Key", data=SaltedPassword)
+     * - ClientSignature = HMAC(key=AuthMessage, data=StoredKey)
      */
     fun computeScramClientProof(
         password: String,
@@ -43,13 +46,22 @@ object HuaweiCrypto {
     ): String {
         try {
             val saltBytes = hexStringToByteArray(saltHex)
+            if (saltBytes.isEmpty()) return ""
+
             val spec = PBEKeySpec(password.toCharArray(), saltBytes, iterations, 256)
             val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
             val saltedPassword = skf.generateSecret(spec).encoded
 
-            val clientKey = hmacSha256(saltedPassword, "Client Key".toByteArray(StandardCharsets.UTF_8))
+            // Huawei parameter swap:
+            // Standard: HMAC(key=SaltedPassword, data="Client Key")
+            // Huawei:   HMAC(key="Client Key", data=SaltedPassword)
+            val clientKey = hmacSha256("Client Key".toByteArray(StandardCharsets.UTF_8), saltedPassword)
             val storedKey = MessageDigest.getInstance("SHA-256").digest(clientKey)
-            val clientSignature = hmacSha256(storedKey, authMsg.toByteArray(StandardCharsets.UTF_8))
+
+            // Huawei parameter swap:
+            // Standard: HMAC(key=StoredKey, data=AuthMessage)
+            // Huawei:   HMAC(key=AuthMessage, data=StoredKey)
+            val clientSignature = hmacSha256(authMsg.toByteArray(StandardCharsets.UTF_8), storedKey)
 
             val clientProof = ByteArray(clientKey.size)
             for (i in clientKey.indices) {
@@ -67,12 +79,16 @@ object HuaweiCrypto {
         return mac.doFinal(data)
     }
 
-    private fun hexStringToByteArray(s: String): ByteArray {
-        val len = s.length
+    fun hexStringToByteArray(s: String): ByteArray {
+        val clean = s.trim()
+        val len = clean.length
         val data = ByteArray(len / 2)
         var i = 0
-        while (i < len) {
-            data[i / 2] = ((Character.digit(s[i], 16) shl 4) + Character.digit(s[i + 1], 16)).toByte()
+        while (i < len - 1) {
+            val high = Character.digit(clean[i], 16)
+            val low = Character.digit(clean[i + 1], 16)
+            if (high == -1 || low == -1) break
+            data[i / 2] = ((high shl 4) + low).toByte()
             i += 2
         }
         return data

@@ -50,7 +50,8 @@ import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.CardBorder
 import com.huaweimanager.app.ui.theme.DarkBackground
 import com.huaweimanager.app.ui.theme.SignalExcellent
-import com.huaweimanager.app.ui.theme.SignalGood
+import androidx.compose.material.icons.filled.Warning
+import com.huaweimanager.app.ui.theme.SignalPoor
 import com.huaweimanager.app.ui.theme.TextMuted
 import com.huaweimanager.app.ui.theme.TextPrimary
 import com.huaweimanager.app.ui.theme.TextSecondary
@@ -62,6 +63,7 @@ fun BandLockScreen(
     modifier: Modifier = Modifier
 ) {
     val signal by viewModel.signalInfo.collectAsState()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     val individualBands = remember { LteBand.ALL_BANDS }
@@ -110,6 +112,37 @@ fun BandLockScreen(
                         tint = AccentPrimary,
                         modifier = Modifier.size(24.dp)
                     )
+                }
+            }
+        }
+
+        // Warning banner if not logged in
+        if (!isLoggedIn) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(SignalPoor.copy(alpha = 0.12f))
+                        .border(1.dp, SignalPoor.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                        .padding(14.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = SignalPoor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Kunci Band memerlukan autentikasi. Buka tab 'Alat' untuk memasukkan password admin modem dan login terlebih dahulu.",
+                            color = SignalPoor,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = 16.sp
+                        )
+                    }
                 }
             }
         }

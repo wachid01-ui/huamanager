@@ -19,6 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PhoneForwarded
@@ -67,12 +70,15 @@ fun ToolsScreen(
     modifier: Modifier = Modifier
 ) {
     val routerIp by viewModel.routerIp.collectAsState()
+    val routerUsername by viewModel.routerUsername.collectAsState()
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val loginError by viewModel.loginError.collectAsState()
     val deviceInfo by viewModel.deviceInfo.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val ussdResponse by viewModel.ussdResponse.collectAsState()
 
     var inputIp by remember(routerIp) { mutableStateOf(routerIp) }
+    var inputUsername by remember(routerUsername) { mutableStateOf(routerUsername) }
     var password by remember { mutableStateOf("") }
     var ussdCode by remember { mutableStateOf("*888#") }
     var showRebootConfirm by remember { mutableStateOf(false) }
@@ -133,6 +139,26 @@ fun ToolsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    // Admin Username
+                    OutlinedTextField(
+                        value = inputUsername,
+                        onValueChange = { inputUsername = it },
+                        label = { Text("Username WebUI Modem (Default: admin)") },
+                        leadingIcon = {
+                            Icon(Icons.Default.AccountCircle, contentDescription = null, tint = AccentPrimary)
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            focusedBorderColor = AccentPrimary,
+                            unfocusedBorderColor = CardBorder,
+                            focusedLabelColor = AccentPrimary,
+                            unfocusedLabelColor = TextMuted
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     // Admin Password
                     OutlinedTextField(
                         value = password,
@@ -158,20 +184,56 @@ fun ToolsScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    // Error Message Display if any
+                    loginError?.let { err ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(SignalPoor.copy(alpha = 0.12f))
+                                .border(1.dp, SignalPoor.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ErrorOutline,
+                                contentDescription = null,
+                                tint = SignalPoor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = err,
+                                color = SignalPoor,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (isLoggedIn) "Status: Sudah Login" else "Status: Belum Login",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (isLoggedIn) SignalExcellent else TextMuted
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isLoggedIn) Icons.Default.CheckCircle else Icons.Default.Info,
+                                contentDescription = null,
+                                tint = if (isLoggedIn) SignalExcellent else TextMuted,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (isLoggedIn) "Status: Sudah Login" else "Status: Belum Login",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isLoggedIn) SignalExcellent else TextMuted
+                            )
+                        }
 
                         Button(
-                            onClick = { viewModel.login(password) {} },
+                            onClick = { viewModel.login(password = password, username = inputUsername) },
                             enabled = password.isNotBlank() && !isRefreshing,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = AccentPrimary,
@@ -179,9 +241,50 @@ fun ToolsScreen(
                             ),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Text("Login", fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (isRefreshing) "Memproses..." else "Login",
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
+                }
+            }
+        }
+
+        // Section: Petunjuk & Tips
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(DarkBackground)
+                    .border(1.dp, CardBorder, RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            tint = AccentPrimary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Petunjuk Penggunaan Login Modem",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AccentPrimary
+                        )
+                    }
+                    Text(
+                        text = "1. Pastikan HP Android Anda terhubung ke jaringan WiFi modem Huawei (bukan data seluler HP).\n" +
+                               "2. Password admin modem biasanya tercantum di stiker bawah router atau password WebUI yang Anda buat saat pertama kali aktivasi.\n" +
+                               "3. Setelah status 'Sudah Login', Anda dapat mengunci frekuensi (Band Locking), membaca/kirim SMS, dan restart router.",
+                        fontSize = 11.sp,
+                        color = TextSecondary,
+                        lineHeight = 16.sp
+                    )
                 }
             }
         }
