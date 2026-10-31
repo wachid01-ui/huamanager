@@ -9,6 +9,7 @@ import com.huaweimanager.app.data.model.DeviceInfo
 import com.huaweimanager.app.data.model.NetworkStatus
 import com.huaweimanager.app.data.model.SignalInfo
 import com.huaweimanager.app.data.model.SmsMessage
+import com.huaweimanager.app.ui.theme.AppThemeMode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +34,21 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _savedPassword = MutableStateFlow(prefs.getString("saved_password", "") ?: "")
     val savedPassword: StateFlow<String> = _savedPassword.asStateFlow()
+
+    private val savedThemeModeStr = prefs.getString("app_theme", AppThemeMode.DARK_CYAN.name) ?: AppThemeMode.DARK_CYAN.name
+    private val initialThemeMode = try {
+        AppThemeMode.valueOf(savedThemeModeStr)
+    } catch (e: Exception) {
+        AppThemeMode.DARK_CYAN
+    }
+
+    private val _appTheme = MutableStateFlow(initialThemeMode)
+    val appTheme: StateFlow<AppThemeMode> = _appTheme.asStateFlow()
+
+    fun setAppTheme(theme: AppThemeMode) {
+        _appTheme.value = theme
+        prefs.edit().putString("app_theme", theme.name).apply()
+    }
 
     private val _loginError = MutableStateFlow<String?>(null)
     val loginError: StateFlow<String?> = _loginError.asStateFlow()

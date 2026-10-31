@@ -42,6 +42,7 @@ import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.DarkBackground
 import com.huaweimanager.app.ui.theme.HuaweiManagerTheme
+import com.huaweimanager.app.ui.theme.OnAccentColor
 import com.huaweimanager.app.ui.theme.TextMuted
 import com.huaweimanager.app.ui.theme.TextPrimary
 import com.huaweimanager.app.ui.viewmodel.HuaweiViewModel
@@ -58,7 +59,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HuaweiManagerTheme {
+            val appTheme by viewModel.appTheme.collectAsState()
+            HuaweiManagerTheme(themeMode = appTheme) {
                 MainAppScreen(viewModel = viewModel)
             }
         }
@@ -112,7 +114,7 @@ fun MainAppScreen(viewModel: HuaweiViewModel) {
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = DarkBackground,
+                            selectedIconColor = OnAccentColor,
                             selectedTextColor = AccentPrimary,
                             indicatorColor = AccentPrimary,
                             unselectedIconColor = TextMuted,

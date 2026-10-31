@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huaweimanager.app.data.model.SignalQualityLevel
+import com.huaweimanager.app.ui.theme.CardBorder
 import com.huaweimanager.app.ui.theme.SignalExcellent
 import com.huaweimanager.app.ui.theme.SignalFair
 import com.huaweimanager.app.ui.theme.SignalGood
@@ -73,7 +74,7 @@ fun SignalGauge(
             val strokeWidth = 14.dp.toPx()
             // Background arc (240 degrees)
             drawArc(
-                color = Color(0xFF1E232B),
+                color = CardBorder,
                 startAngle = 150f,
                 sweepAngle = 240f,
                 useCenter = false,
