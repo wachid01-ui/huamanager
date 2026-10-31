@@ -93,7 +93,8 @@ data class SignalInfo(
     }
 
     /**
-     * Sector ID = ECI % 256
+     * Local Cell ID (LCID) = ECI % 256
+     * (Range 0 - 255. Operator sering menggunakan offset 10-an atau 100-an untuk membedakan frekuensi/carrier)
      */
     fun getCalculatedSectorId(): Int? {
         val eci = getEciDecimal() ?: return null
@@ -101,15 +102,38 @@ data class SignalInfo(
     }
 
     /**
+     * Normalisasi Local Cell ID ke Sektor Fisik Antena Menara (1, 2, atau 3):
+     * - Seri 1-3, 4-6, 7-9
+     * - Seri 11-13, 21-23
+     * - Seri 101-103, 104-106, 107-109 (contoh: 107 = Sektor Fisik 1 pada Carrier ke-3)
+     */
+    fun getPhysicalSectorNumber(): Int {
+        val lcid = getCalculatedSectorId() ?: return 1
+        val base = when {
+            lcid >= 200 -> lcid - 200
+            lcid >= 100 -> lcid - 100
+            lcid >= 10 -> lcid % 10
+            else -> lcid
+        }
+        return when (base % 3) {
+            1 -> 1
+            2 -> 2
+            0 -> 3
+            else -> 1
+        }
+    }
+
+    /**
      * Estimated sector antenna azimuth direction
      */
     fun getSectorAzimuthDescription(): String {
-        val sector = getCalculatedSectorId() ?: return "Sektor tidak diketahui"
-        return when (sector % 3) {
-            1 -> "Sektor 1: Menghadap ~0° - 120° (Utara – Timur Laut)"
-            2 -> "Sektor 2: Menghadap ~120° - 240° (Tenggara – Selatan)"
-            0 -> "Sektor 3: Menghadap ~240° - 360° (Barat Laut – Barat)"
-            else -> "Sektor $sector"
+        val physical = getPhysicalSectorNumber()
+        val lcid = getCalculatedSectorId() ?: return "Sektor tidak diketahui"
+        return when (physical) {
+            1 -> "Sektor Fisik 1 (LCID $lcid): Menghadap ~0° - 120° (Utara – Timur Laut)"
+            2 -> "Sektor Fisik 2 (LCID $lcid): Menghadap ~120° - 240° (Tenggara – Selatan)"
+            3 -> "Sektor Fisik 3 (LCID $lcid): Menghadap ~240° - 360° (Barat Laut – Barat)"
+            else -> "Sektor Fisik $physical (LCID $lcid)"
         }
     }
 

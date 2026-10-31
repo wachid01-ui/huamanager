@@ -228,8 +228,9 @@ fun TowerScreen(
                                 fontFamily = FontFamily.Monospace
                             )
                             if (sectorId != null) {
+                                val physicalSector = signal.getPhysicalSectorNumber()
                                 Text(
-                                    text = "Sektor Antena: Sektor $sectorId",
+                                    text = "Sektor Fisik: Sektor $physicalSector  •  LCID: $sectorId",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = SignalGood
@@ -238,7 +239,7 @@ fun TowerScreen(
                         }
                     }
 
-                    // Parameter Grid (Cell ID, PCI, Band, TAC)
+                    // Parameter Grid (Cell ID, LCID, PCI, Band, TAC)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -250,9 +251,9 @@ fun TowerScreen(
                             modifier = Modifier.weight(1f)
                         )
                         TowerInfoBadge(
-                            label = "PCI (Physical Cell)",
-                            value = signal.pci,
-                            subValue = "Frekuensi: ${signal.dlFrequency}",
+                            label = "Local Cell ID (LCID)",
+                            value = if (sectorId != null) "$sectorId" else "-",
+                            subValue = "Sektor Fisik: Sektor ${signal.getPhysicalSectorNumber()}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -268,9 +269,27 @@ fun TowerScreen(
                             modifier = Modifier.weight(1f)
                         )
                         TowerInfoBadge(
+                            label = "PCI (Physical Cell)",
+                            value = signal.pci,
+                            subValue = "Frekuensi: ${signal.dlFrequency}",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TowerInfoBadge(
                             label = "TAC / Area Code",
                             value = signal.tac,
                             subValue = "PLMN: ${signal.plmn}",
+                            modifier = Modifier.weight(1f)
+                        )
+                        TowerInfoBadge(
+                            label = "Kekuatan Sinyal (RSRP)",
+                            value = signal.rsrp,
+                            subValue = "SINR: ${signal.sinr} | RSRQ: ${signal.rsrq}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -306,13 +325,13 @@ fun TowerScreen(
                     }
 
                     Text(
-                        text = "Menara BTS 4G umumnya membagi pancaran ke dalam 3 sektor antena (sudut 120°):",
+                        text = "Menara BTS 4G umumnya membagi pancaran ke dalam 3 sektor antena fisik (sudut 120°):",
                         fontSize = 11.sp,
                         color = TextSecondary
                     )
 
-                    // 3 Sector Visual Tiles
-                    val activeSectorNum = sectorId?.let { (it % 3) }
+                    // 3 Sector Visual Tiles based on Physical Sector Number
+                    val physicalSectorNum = signal.getPhysicalSectorNumber()
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -321,28 +340,30 @@ fun TowerScreen(
                             sectorTitle = "Sektor 1",
                             degrees = "0° – 120°",
                             direction = "Utara / Timur Laut",
-                            isActive = activeSectorNum == 1,
+                            isActive = physicalSectorNum == 1,
                             modifier = Modifier.weight(1f)
                         )
                         SectorTile(
                             sectorTitle = "Sektor 2",
                             degrees = "120° – 240°",
                             direction = "Tenggara / Selatan",
-                            isActive = activeSectorNum == 2,
+                            isActive = physicalSectorNum == 2,
                             modifier = Modifier.weight(1f)
                         )
                         SectorTile(
                             sectorTitle = "Sektor 3",
                             degrees = "240° – 360°",
                             direction = "Barat Laut / Barat",
-                            isActive = activeSectorNum == 0,
+                            isActive = physicalSectorNum == 3,
                             modifier = Modifier.weight(1f)
                         )
                     }
 
                     // Helpful advice
                     Text(
-                        text = "💡 Tips Pointing: " + signal.getSectorAzimuthDescription() + ". Arahkan antena luar (Yagi/LPDA) lurus menghadap sektor ini untuk mendapatkan SINR tertinggi.",
+                        text = "💡 Panduan Arah: " + signal.getSectorAzimuthDescription() +
+                                (if (sectorId != null && sectorId > 3) "\nℹ️ Info Sektor: Angka $sectorId adalah Local Cell ID (LCID) operator. Operator seluler memakai seri 100-an untuk membedakan frekuensi/carrier ke-3, yang secara fisik mengarah ke Sektor $physicalSectorNum." else "") +
+                                "\nArahkan antena luar (Yagi/LPDA) lurus ke arah sektor ini untuk memperoleh SINR tertinggi.",
                         fontSize = 11.sp,
                         color = TextMuted,
                         lineHeight = 15.sp
@@ -587,8 +608,21 @@ fun TowerScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = SignalExcellent
                                 )
+                                val lcid = calcResultSector ?: 0
+                                val base = when {
+                                    lcid >= 200 -> lcid - 200
+                                    lcid >= 100 -> lcid - 100
+                                    lcid >= 10 -> lcid % 10
+                                    else -> lcid
+                                }
+                                val phys = when (base % 3) {
+                                    1 -> 1
+                                    2 -> 2
+                                    0 -> 3
+                                    else -> 1
+                                }
                                 Text(
-                                    text = "Sektor Antena: Sektor ${calcResultSector ?: 0}",
+                                    text = "Sektor Fisik: Sektor $phys  •  LCID: $lcid",
                                     fontSize = 13.sp,
                                     color = SignalGood
                                 )
