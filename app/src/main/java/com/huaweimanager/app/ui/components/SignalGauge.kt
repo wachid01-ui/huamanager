@@ -58,6 +58,8 @@ fun SignalGauge(
         SignalQualityLevel.UNKNOWN -> SignalInactive
     }
 
+    val trackColor = CardBorder
+
     val qualityLabel = when (quality) {
         SignalQualityLevel.EXCELLENT -> "SANGAT BAIK"
         SignalQualityLevel.GOOD -> "BAIK"
@@ -74,7 +76,7 @@ fun SignalGauge(
             val strokeWidth = 14.dp.toPx()
             // Background arc (240 degrees)
             drawArc(
-                color = CardBorder,
+                color = trackColor,
                 startAngle = 150f,
                 sweepAngle = 240f,
                 useCenter = false,
