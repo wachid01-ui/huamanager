@@ -137,6 +137,29 @@ data class SignalInfo(
         }
     }
 
+    /**
+     * Perkiraan letak posisi menara BTS relatif dari lokasi rumah pengguna
+     */
+    fun getEstimatedTowerBearing(): String {
+        return when (getPhysicalSectorNumber()) {
+            1 -> "SELATAN (atau Barat Daya)"
+            2 -> "UTARA (atau Barat Laut)"
+            3 -> "TIMUR (atau Tenggara)"
+            else -> "SELATAN"
+        }
+    }
+
+    /**
+     * Panduan rekomendasi arah hadap pointing antena luar
+     */
+    fun getAntennaPointingAdvice(): String {
+        val bearing = getEstimatedTowerBearing()
+        val physical = getPhysicalSectorNumber()
+        val lcid = getCalculatedSectorId() ?: 0
+        val lcidText = if (lcid > 0) " (LCID: $lcid)" else ""
+        return "Menara BTS diperkirakan berada di sebelah $bearing dari lokasi Anda (karena antena pemancar Sektor $physical$lcidText menembak ke arah rumah Anda). Arahkan antena luar (Yagi/LPDA) menghadap ke arah $bearing."
+    }
+
     fun getMcc(): String {
         val clean = plmn.trim()
         return if (clean.length >= 3) clean.substring(0, 3) else "510"

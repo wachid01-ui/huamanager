@@ -297,6 +297,88 @@ fun TowerScreen(
             }
         }
 
+        // Section: Direct Tower Location & Pointing Guide Banner
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(AccentPrimary.copy(alpha = 0.08f))
+                    .border(1.5.dp, AccentPrimary.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(AccentPrimary.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.NearMe,
+                                contentDescription = null,
+                                tint = AccentPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column {
+                            Text(
+                                text = "Perkiraan Letak Menara BTS:",
+                                fontSize = 11.sp,
+                                color = TextMuted
+                            )
+                            Text(
+                                text = "Di sebelah ${signal.getEstimatedTowerBearing()} rumah Anda",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = SignalExcellent
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(CardBackground)
+                            .padding(12.dp)
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = SignalGood,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Rekomendasi Arah Pointing Antena:",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AccentPrimary
+                                )
+                            }
+                            Text(
+                                text = "Arahkan moncong antena luar (Yagi/LPDA/Grid) menghadap ke arah ${signal.getEstimatedTowerBearing()} agar berhadapan lurus dengan pancaran Sektor ${signal.getPhysicalSectorNumber()}${if (sectorId != null && sectorId > 3) " (LCID $sectorId)" else ""}.",
+                                fontSize = 11.sp,
+                                color = TextPrimary,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // Section: Sector Antenna Direction & Azimuth Guide
         item {
             Box(
@@ -475,6 +557,8 @@ fun TowerScreen(
                                 appendLine("SINR          : ${signal.sinr}")
                                 appendLine("RSRQ          : ${signal.rsrq}")
                                 appendLine("Arah Sektor   : ${signal.getSectorAzimuthDescription()}")
+                                appendLine("Letak Menara  : Di sebelah ${signal.getEstimatedTowerBearing()} posisi Anda")
+                                appendLine("Arah Pointing : Hadapkan antena luar ke ${signal.getEstimatedTowerBearing()}")
                                 appendLine("CellMapper    : ${signal.getCellMapperUrl()}")
                             }
                             clipboard.setText(AnnotatedString(copyText))
