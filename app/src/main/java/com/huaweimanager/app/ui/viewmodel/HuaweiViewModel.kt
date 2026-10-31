@@ -31,6 +31,9 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
     private val _routerUsername = MutableStateFlow(prefs.getString("router_username", "admin") ?: "admin")
     val routerUsername: StateFlow<String> = _routerUsername.asStateFlow()
 
+    private val _savedPassword = MutableStateFlow(prefs.getString("saved_password", "") ?: "")
+    val savedPassword: StateFlow<String> = _savedPassword.asStateFlow()
+
     private val _loginError = MutableStateFlow<String?>(null)
     val loginError: StateFlow<String?> = _loginError.asStateFlow()
 
@@ -84,6 +87,18 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
             val conn = apiClient.testConnection()
             _isConnected.value = conn.isSuccess
             if (conn.isSuccess) {
+                // Auto-login if previously logged in and credentials saved
+                val wasLoggedIn = prefs.getBoolean("is_logged_in", false)
+                val savedPw = prefs.getString("saved_password", "") ?: ""
+                val savedUser = prefs.getString("router_username", "admin") ?: "admin"
+
+                if (wasLoggedIn && savedPw.isNotEmpty()) {
+                    val loginRes = apiClient.login(savedUser, savedPw)
+                    if (loginRes.isSuccess) {
+                        _isLoggedIn.value = true
+                    }
+                }
+
                 refreshSignalAndStatus()
                 loadDeviceInfo()
                 if (_isAutoRefresh.value) {
@@ -157,12 +172,20 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _isRefreshing.value = true
             _loginError.value = null
-            setRouterUsername(username)
-            val result = apiClient.login(username, password)
+            val cleanUsername = username.trim()
+            val cleanPassword = password.trim()
+            setRouterUsername(cleanUsername)
+            val result = apiClient.login(cleanUsername, cleanPassword)
             _isRefreshing.value = false
             if (result.isSuccess) {
                 _isLoggedIn.value = true
                 _loginError.value = null
+                _savedPassword.value = cleanPassword
+                prefs.edit()
+                    .putString("router_username", cleanUsername)
+                    .putString("saved_password", cleanPassword)
+                    .putBoolean("is_logged_in", true)
+                    .apply()
                 _toastMessage.value = "Login berhasil!"
                 loadDeviceInfo()
                 refreshSignalAndStatus()
@@ -174,6 +197,21 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
                 _toastMessage.value = err
                 onResult(false)
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            apiClient.logout()
+            prefs.edit()
+                .putBoolean("is_logged_in", false)
+                .remove("saved_password")
+                .apply()
+            _isLoggedIn.value = false
+            _savedPassword.value = ""
+            _toastMessage.value = "Berhasil logout dari modem"
+            _isRefreshing.value = false
         }
     }
 

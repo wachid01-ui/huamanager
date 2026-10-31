@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PhoneForwarded
@@ -29,10 +30,13 @@ import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.SignalCellularAlt
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -51,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huaweimanager.app.ui.theme.AccentPrimary
@@ -76,10 +81,12 @@ fun ToolsScreen(
     val deviceInfo by viewModel.deviceInfo.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val ussdResponse by viewModel.ussdResponse.collectAsState()
+    val savedPassword by viewModel.savedPassword.collectAsState()
 
     var inputIp by remember(routerIp) { mutableStateOf(routerIp) }
     var inputUsername by remember(routerUsername) { mutableStateOf(routerUsername) }
-    var password by remember { mutableStateOf("") }
+    var password by remember(savedPassword) { mutableStateOf(savedPassword) }
+    var passwordVisible by remember { mutableStateOf(false) }
     var ussdCode by remember { mutableStateOf("*888#") }
     var showRebootConfirm by remember { mutableStateOf(false) }
 
@@ -167,8 +174,17 @@ fun ToolsScreen(
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null, tint = AccentPrimary)
                         },
+                        trailingIcon = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (passwordVisible) "Sembunyikan password" else "Lihat password",
+                                    tint = AccentPrimary
+                                )
+                            }
+                        },
                         singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
+                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
@@ -232,19 +248,45 @@ fun ToolsScreen(
                             )
                         }
 
-                        Button(
-                            onClick = { viewModel.login(password = password, username = inputUsername) },
-                            enabled = password.isNotBlank() && !isRefreshing,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = AccentPrimary,
-                                contentColor = DarkBackground
-                            ),
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            Text(
-                                text = if (isRefreshing) "Memproses..." else "Login",
-                                fontWeight = FontWeight.Bold
-                            )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (isLoggedIn) {
+                                Button(
+                                    onClick = { viewModel.logout() },
+                                    enabled = !isRefreshing,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = SignalPoor.copy(alpha = 0.15f),
+                                        contentColor = SignalPoor
+                                    ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, SignalPoor.copy(alpha = 0.5f))
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ExitToApp,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Logout",
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+
+                            Button(
+                                onClick = { viewModel.login(password = password.trim(), username = inputUsername.trim()) },
+                                enabled = password.isNotBlank() && !isRefreshing,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = AccentPrimary,
+                                    contentColor = DarkBackground
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(
+                                    text = if (isRefreshing) "Memproses..." else if (isLoggedIn) "Login Ulang" else "Login",
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -280,7 +322,9 @@ fun ToolsScreen(
                     Text(
                         text = "1. Pastikan HP Android Anda terhubung ke jaringan WiFi modem Huawei (bukan data seluler HP).\n" +
                                "2. Password admin modem biasanya tercantum di stiker bawah router atau password WebUI yang Anda buat saat pertama kali aktivasi.\n" +
-                               "3. Setelah status 'Sudah Login', Anda dapat mengunci frekuensi (Band Locking), membaca/kirim SMS, dan restart router.",
+                               "3. Gunakan ikon mata pada kolom password untuk memastikan huruf besar/kecil (kapital) dan simbol sudah sesuai tanpa salah ketik.\n" +
+                               "4. Aplikasi otomatis menyimpan sesi login sehingga Anda tetap login setiap kali membuka aplikasi sampai menekan tombol Logout.\n" +
+                               "5. Setelah status 'Sudah Login', Anda dapat mengunci frekuensi (Band Locking), membaca/kirim SMS, dan restart router.",
                         fontSize = 11.sp,
                         color = TextSecondary,
                         lineHeight = 16.sp
