@@ -297,7 +297,82 @@ fun TowerScreen(
             }
         }
 
-        // Section: Direct Tower Location & Pointing Guide Banner
+        // Section: Sector Antenna Direction & Azimuth Guide
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(CardBackground)
+                    .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
+                            tint = AccentPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Arah Sektor Antena Pemancar (Azimuth)",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextPrimary
+                        )
+                    }
+
+                    Text(
+                        text = "Menara BTS 4G umumnya membagi pancaran ke dalam 3 sektor antena fisik (sudut 120°):",
+                        fontSize = 11.sp,
+                        color = TextSecondary
+                    )
+
+                    // 3 Sector Visual Tiles based on Physical Sector Number
+                    val physicalSectorNum = signal.getPhysicalSectorNumber()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SectorTile(
+                            sectorTitle = "Sektor 1",
+                            degrees = "0° – 120°",
+                            direction = "Utara / Timur Laut",
+                            isActive = physicalSectorNum == 1,
+                            modifier = Modifier.weight(1f)
+                        )
+                        SectorTile(
+                            sectorTitle = "Sektor 2",
+                            degrees = "120° – 240°",
+                            direction = "Tenggara / Selatan",
+                            isActive = physicalSectorNum == 2,
+                            modifier = Modifier.weight(1f)
+                        )
+                        SectorTile(
+                            sectorTitle = "Sektor 3",
+                            degrees = "240° – 360°",
+                            direction = "Barat Laut / Barat",
+                            isActive = physicalSectorNum == 3,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    // Helpful advice
+                    Text(
+                        text = "💡 Panduan Arah: " + signal.getSectorAzimuthDescription() +
+                                (if (sectorId != null && sectorId > 3) "\nℹ️ Info Sektor: Angka $sectorId adalah Local Cell ID (LCID) operator. Operator seluler memakai seri 100-an untuk membedakan frekuensi/carrier ke-3, yang secara fisik mengarah ke Sektor $physicalSectorNum." else "") +
+                                "\nArahkan antena luar (Yagi/LPDA) lurus ke arah sektor ini untuk memperoleh SINR tertinggi.",
+                        fontSize = 11.sp,
+                        color = TextMuted,
+                        lineHeight = 15.sp
+                    )
+                }
+            }
+        }
+
+        // Section: Direct Tower Location & Pointing Guide Banner (Di bawah Arah Sektor)
         item {
             Box(
                 modifier = Modifier
@@ -375,81 +450,6 @@ fun TowerScreen(
                             )
                         }
                     }
-                }
-            }
-        }
-
-        // Section: Sector Antenna Direction & Azimuth Guide
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(CardBackground)
-                    .border(1.dp, CardBorder, RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Explore,
-                            contentDescription = null,
-                            tint = AccentPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Arah Sektor Antena Pemancar (Azimuth)",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                    }
-
-                    Text(
-                        text = "Menara BTS 4G umumnya membagi pancaran ke dalam 3 sektor antena fisik (sudut 120°):",
-                        fontSize = 11.sp,
-                        color = TextSecondary
-                    )
-
-                    // 3 Sector Visual Tiles based on Physical Sector Number
-                    val physicalSectorNum = signal.getPhysicalSectorNumber()
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        SectorTile(
-                            sectorTitle = "Sektor 1",
-                            degrees = "0° – 120°",
-                            direction = "Utara / Timur Laut",
-                            isActive = physicalSectorNum == 1,
-                            modifier = Modifier.weight(1f)
-                        )
-                        SectorTile(
-                            sectorTitle = "Sektor 2",
-                            degrees = "120° – 240°",
-                            direction = "Tenggara / Selatan",
-                            isActive = physicalSectorNum == 2,
-                            modifier = Modifier.weight(1f)
-                        )
-                        SectorTile(
-                            sectorTitle = "Sektor 3",
-                            degrees = "240° – 360°",
-                            direction = "Barat Laut / Barat",
-                            isActive = physicalSectorNum == 3,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    // Helpful advice
-                    Text(
-                        text = "💡 Panduan Arah: " + signal.getSectorAzimuthDescription() +
-                                (if (sectorId != null && sectorId > 3) "\nℹ️ Info Sektor: Angka $sectorId adalah Local Cell ID (LCID) operator. Operator seluler memakai seri 100-an untuk membedakan frekuensi/carrier ke-3, yang secara fisik mengarah ke Sektor $physicalSectorNum." else "") +
-                                "\nArahkan antena luar (Yagi/LPDA) lurus ke arah sektor ini untuk memperoleh SINR tertinggi.",
-                        fontSize = 11.sp,
-                        color = TextMuted,
-                        lineHeight = 15.sp
-                    )
                 }
             }
         }
