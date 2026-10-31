@@ -328,7 +328,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             }
 
             val pci = extractXmlTag(body, "pci")
-            val cellId = extractXmlTag(body, "cell_id")
+            val cellId = extractXmlTag(body, "cell_id").ifEmpty { extractXmlTag(body, "cellid") }
             val rsrq = extractXmlTag(body, "rsrq")
             val rsrp = extractXmlTag(body, "rsrp")
             val rssi = extractXmlTag(body, "rssi")
@@ -337,6 +337,9 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             val dlFreq = extractXmlTag(body, "dlfrequency")
             val mode = extractXmlTag(body, "mode")
             val plmn = extractXmlTag(body, "plmn")
+            val tac = extractXmlTag(body, "tac")
+            val earfcn = extractXmlTag(body, "earfcn")
+            val enodebId = extractXmlTag(body, "enodeb_id").ifEmpty { extractXmlTag(body, "enodebid") }
 
             Result.success(
                 SignalInfo(
@@ -349,7 +352,10 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                     band = band.ifEmpty { "-" },
                     dlFrequency = dlFreq.ifEmpty { "-" },
                     mode = mode.ifEmpty { "-" },
-                    plmn = plmn.ifEmpty { "-" }
+                    plmn = plmn.ifEmpty { "-" },
+                    tac = tac.ifEmpty { "-" },
+                    earfcn = earfcn.ifEmpty { "-" },
+                    enodebId = enodebId.ifEmpty { "-" }
                 )
             )
         } catch (e: Exception) {

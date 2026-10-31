@@ -294,8 +294,8 @@ fun DashboardScreen(
                         modifier = Modifier.weight(1f)
                     )
                     MetricCard(
-                        label = "CELL ID",
-                        value = signal.cellId,
+                        label = "eNodeB / CELL ID",
+                        value = signal.getCalculatedEnodebId()?.let { "eNB $it" } ?: signal.cellId,
                         modifier = Modifier.weight(1f)
                     )
                 }

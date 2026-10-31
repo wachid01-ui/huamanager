@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CellTower
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -36,6 +37,7 @@ import com.huaweimanager.app.ui.screens.BandLockScreen
 import com.huaweimanager.app.ui.screens.DashboardScreen
 import com.huaweimanager.app.ui.screens.SmsScreen
 import com.huaweimanager.app.ui.screens.ToolsScreen
+import com.huaweimanager.app.ui.screens.TowerScreen
 import com.huaweimanager.app.ui.theme.AccentPrimary
 import com.huaweimanager.app.ui.theme.CardBackground
 import com.huaweimanager.app.ui.theme.DarkBackground
@@ -70,7 +72,8 @@ fun MainAppScreen(viewModel: HuaweiViewModel) {
     val toastMessage by viewModel.toastMessage.collectAsState()
 
     val navItems = listOf(
-        NavItem("Sinyal", Icons.Default.CellTower),
+        NavItem("Sinyal", Icons.Default.SignalCellularAlt),
+        NavItem("Tower", Icons.Default.CellTower),
         NavItem("Kunci Band", Icons.Default.Lock),
         NavItem("SMS", Icons.Default.Email),
         NavItem("Alat", Icons.Default.Build)
@@ -125,15 +128,19 @@ fun MainAppScreen(viewModel: HuaweiViewModel) {
                 viewModel = viewModel,
                 modifier = Modifier.padding(innerPadding)
             )
-            1 -> BandLockScreen(
+            1 -> TowerScreen(
                 viewModel = viewModel,
                 modifier = Modifier.padding(innerPadding)
             )
-            2 -> SmsScreen(
+            2 -> BandLockScreen(
                 viewModel = viewModel,
                 modifier = Modifier.padding(innerPadding)
             )
-            3 -> ToolsScreen(
+            3 -> SmsScreen(
+                viewModel = viewModel,
+                modifier = Modifier.padding(innerPadding)
+            )
+            4 -> ToolsScreen(
                 viewModel = viewModel,
                 modifier = Modifier.padding(innerPadding)
             )

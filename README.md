@@ -16,7 +16,15 @@ Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), memb
    - **Band Aktif & Frekuensi**: Menampilkan frekuensi yang sedang digunakan (misal Band 3 - 1800 MHz).
    - **Auto-Refresh**: Pembaharuan data otomatis setiap 2.5 detik.
 
-2. **Kunci Frekuensi LTE (Band Locking)**
+2. **Pelacak Menara BTS & Cell ID (Tower Tracker)**
+   - **eNodeB ID**: Menguraikan ID fisik menara BTS pemancar secara otomatis dari Cell ID (`ECI / 256`).
+   - **Sektor Antena & Azimuth**: Mengetahui sektor antena aktif (Sektor 1: 0°-120°, Sektor 2: 120°-240°, Sektor 3: 240°-360°) untuk mempermudah *pointing* antena eksternal (Yagi / LPDA / Grid / MIMO).
+   - **Integrasi CellMapper.net**: Buka lokasi menara BTS langsung di peta CellMapper terfilter sesuai operator (Telkomsel, Indosat, XL, Smartfren, Tri).
+   - **Google Maps & OpenCelliD**: Pintasan navigasi ke lokasi pemancar sekitar.
+   - **Kalkulator Manual eNodeB**: Alat bantu hitung eNodeB ID & Sektor dari angka Cell ID manual.
+   - **Salin Info Tower**: Salin seluruh parameter teknis menara BTS ke clipboard dalam 1 klik.
+
+3. **Kunci Frekuensi LTE (Band Locking)**
    - **Preset Cepat Operator Indonesia**:
      - **Band 3 (1800 MHz)**: Paling populer & cepat untuk Telkomsel, Indosat, XL, Tri.
      - **Band 40 (2300 MHz TDD)**: Khusus Telkomsel Orbit & Smartfren.
@@ -26,12 +34,12 @@ Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), memb
    - **Carrier Aggregation (4G+)**: Pilihan kombinasi multi-band (B1+B3, B3+B40, dll.).
    - **Custom Band Selector**: Checklist untuk mengunci kombinasi frekuensi apapun secara fleksibel.
 
-3. **Kotak Masuk & Pengiriman SMS**
+4. **Kotak Masuk & Pengiriman SMS**
    - Membaca daftar SMS langsung dari kartu SIM di dalam router.
    - Mengirim SMS langsung dari aplikasi (sangat praktis untuk registrasi paket data atau kirim format aktivasi operator).
    - Menghapus SMS dari kartu SIM modem.
 
-4. **Alat & Kontrol Router (Tools)**
+5. **Alat & Kontrol Router (Tools)**
    - **Konfigurasi IP Modem**: Ubah IP gateway sesuai router Anda (default: `192.168.8.1`).
    - **Autentikasi Aman**: Mendukung router lawas (HiLink standard) maupun router modern/Orbit (SCRAM-SHA-256).
    - **Reboot Modem**: Restart router Huawei langsung dari HP dengan konfirmasi keamanan.
