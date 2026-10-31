@@ -373,11 +373,6 @@ fun TowerScreen(
                 }
             }
         }
-                        lineHeight = 15.sp
-                    )
-                }
-            }
-        }
 
         // Section: Direct Tower Location & Pointing Guide Banner (Di bawah Arah Sektor)
         item {
