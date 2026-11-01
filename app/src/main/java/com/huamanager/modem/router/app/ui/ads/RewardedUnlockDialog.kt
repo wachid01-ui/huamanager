@@ -212,7 +212,7 @@ fun RewardedUnlockDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = S.cancelBtn,
+                        text = S.cancel,
                         color = TextMuted,
                         fontSize = 13.sp
                     )
