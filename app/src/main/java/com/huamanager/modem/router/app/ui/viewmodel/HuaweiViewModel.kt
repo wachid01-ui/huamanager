@@ -99,6 +99,27 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
     private val _ussdResponse = MutableStateFlow<String?>(null)
     val ussdResponse: StateFlow<String?> = _ussdResponse.asStateFlow()
 
+    private val _isProUser = MutableStateFlow(prefs.getBoolean("is_pro_user", false))
+    val isProUser: StateFlow<Boolean> = _isProUser.asStateFlow()
+
+    fun setProUser(isPro: Boolean) {
+        _isProUser.value = isPro
+        prefs.edit().putBoolean("is_pro_user", isPro).apply()
+        if (isPro) {
+            _toastMessage.value = "👑 Selamat! HuaManager PRO telah aktif."
+        }
+    }
+
+    fun restorePro() {
+        val isPro = prefs.getBoolean("is_pro_user", false)
+        _isProUser.value = isPro
+        if (isPro) {
+            _toastMessage.value = "Status PRO berhasil dipulihkan!"
+        } else {
+            _toastMessage.value = "Tidak ditemukan riwayat pembelian sebelumnya."
+        }
+    }
+
     private var pollingJob: Job? = null
 
     init {

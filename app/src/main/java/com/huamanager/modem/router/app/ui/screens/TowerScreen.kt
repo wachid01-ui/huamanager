@@ -63,6 +63,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huamanager.modem.router.app.ui.ads.AdmobNativeCard
 import com.huamanager.modem.router.app.ui.i18n.LocalAppStrings
 import com.huamanager.modem.router.app.ui.theme.AccentPrimary
 import com.huamanager.modem.router.app.ui.theme.CardBackground
@@ -83,6 +84,7 @@ fun TowerScreen(
     modifier: Modifier = Modifier
 ) {
     val S = LocalAppStrings.current
+    val isProUser by viewModel.isProUser.collectAsState()
     val signal by viewModel.signalInfo.collectAsState()
     val netStatus by viewModel.networkStatus.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
@@ -453,6 +455,12 @@ fun TowerScreen(
                         }
                     }
                 }
+            }
+        }
+
+        if (!isProUser) {
+            item {
+                AdmobNativeCard()
             }
         }
 

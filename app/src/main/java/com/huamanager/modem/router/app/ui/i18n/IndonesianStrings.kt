@@ -248,4 +248,20 @@ object IndonesianStrings : AppStrings {
     override val languageSectionTitle = "Bahasa Aplikasi / App Language"
     override val languageSectionSubtitle = "Pilih bahasa antarmuka aplikasi yang Anda inginkan"
     override val activeLanguagePrefix = "Bahasa aktif:"
+
+    // Monetization & PRO Tier
+    override val proTitle = "HuaManager PRO"
+    override val proPrice = "Rp 29.999"
+    override val proSubtitle = "Bebas semua iklan & akses instan tanpa batas selamanya"
+    override val proUpgradeBtn = "Upgrade ke PRO (Rp 29.999)"
+    override val proActiveBadge = "PRO AKTIF"
+    override val proFreeBadge = "VERSI GRATIS"
+    override val proRestoreBtn = "Pulihkan Pembelian"
+    override val proBenefit1 = "100% Bebas Iklan (tanpa banner & kartu sponsor)"
+    override val proBenefit2 = "Kunci Band instan tanpa perlu nonton video"
+    override val proBenefit3 = "Panduan Pointing Antena & Sektor tanpa batas"
+    override val rewardUnlockTitle = "Buka Akses Fitur"
+    override val rewardUnlockDesc = "Tonton 1 video singkat untuk menerapkan perintah ini ke modem Anda, atau upgrade ke PRO untuk akses instan tanpa iklan selamanya."
+    override val watchVideoBtn = "Tonton Video Gratis"
+    override val adNotReady = "Iklan sedang dimuat, silakan coba beberapa detik lagi."
 }

@@ -34,6 +34,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.platform.LocalContext
+import com.huamanager.modem.router.app.ui.ads.AdmobBanner
+import com.huamanager.modem.router.app.ui.ads.AdsManager
 import com.huamanager.modem.router.app.ui.i18n.LocalAppStrings
 import com.huamanager.modem.router.app.ui.screens.BandLockScreen
 import com.huamanager.modem.router.app.ui.screens.DashboardScreen
@@ -78,7 +83,15 @@ fun MainAppScreen(viewModel: HuaweiViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
     val toastMessage by viewModel.toastMessage.collectAsState()
+    val isProUser by viewModel.isProUser.collectAsState()
     val S = LocalAppStrings.current
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (!isProUser) {
+            AdsManager.loadRewardedAd(context)
+        }
+    }
 
     val navItems = listOf(
         NavItem(S.navSignal, Icons.Default.SignalCellularAlt),
@@ -100,34 +113,39 @@ fun MainAppScreen(viewModel: HuaweiViewModel) {
         containerColor = DarkBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            NavigationBar(
-                containerColor = CardBackground,
-                tonalElevation = 8.dp
-            ) {
-                navItems.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.title
+            Column {
+                if (!isProUser) {
+                    AdmobBanner(modifier = Modifier.fillMaxWidth())
+                }
+                NavigationBar(
+                    containerColor = CardBackground,
+                    tonalElevation = 8.dp
+                ) {
+                    navItems.forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            icon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.title
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = item.title,
+                                    fontSize = 11.sp
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = OnAccentColor,
+                                selectedTextColor = AccentPrimary,
+                                indicatorColor = AccentPrimary,
+                                unselectedIconColor = TextMuted,
+                                unselectedTextColor = TextMuted
                             )
-                        },
-                        label = {
-                            Text(
-                                text = item.title,
-                                fontSize = 11.sp
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = OnAccentColor,
-                            selectedTextColor = AccentPrimary,
-                            indicatorColor = AccentPrimary,
-                            unselectedIconColor = TextMuted,
-                            unselectedTextColor = TextMuted
                         )
-                    )
+                    }
                 }
             }
         }

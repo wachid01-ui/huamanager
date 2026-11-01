@@ -248,4 +248,20 @@ object EnglishStrings : AppStrings {
     override val languageSectionTitle = "App Language / Bahasa Aplikasi"
     override val languageSectionSubtitle = "Select your preferred user interface language"
     override val activeLanguagePrefix = "Active language:"
+
+    // Monetization & PRO Tier
+    override val proTitle = "HuaManager PRO"
+    override val proPrice = "Rp 29.999"
+    override val proSubtitle = "Remove all ads & instant unlimited access forever"
+    override val proUpgradeBtn = "Upgrade to PRO (Rp 29.999)"
+    override val proActiveBadge = "PRO ACTIVE"
+    override val proFreeBadge = "FREE VERSION"
+    override val proRestoreBtn = "Restore Purchase"
+    override val proBenefit1 = "100% Ad-Free (no banners or native cards)"
+    override val proBenefit2 = "Instant Band Locking without watching videos"
+    override val proBenefit3 = "Unlimited Antenna Pointing & BTS Guidance"
+    override val rewardUnlockTitle = "Unlock Feature"
+    override val rewardUnlockDesc = "Watch 1 quick video to apply this action to your modem, or upgrade to PRO for instant ad-free access forever."
+    override val watchVideoBtn = "Watch Video Ad (Free)"
+    override val adNotReady = "Ad is loading, please try again in a moment."
 }

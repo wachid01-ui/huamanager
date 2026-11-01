@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.huamanager.modem.router.app.ui.ads.AdmobNativeCard
+import com.huamanager.modem.router.app.ui.ads.RewardedUnlockDialog
 import com.huamanager.modem.router.app.data.model.LteBand
 import com.huamanager.modem.router.app.ui.i18n.LocalAppStrings
 import com.huamanager.modem.router.app.ui.theme.AccentPrimary
@@ -71,6 +73,20 @@ fun BandLockScreen(
 
     val individualBands = remember { LteBand.ALL_BANDS }
     val selectedBands = remember { mutableStateListOf<LteBand>() }
+    val isProUser by viewModel.isProUser.collectAsState()
+    var showUnlockDialog by remember { mutableStateOf(false) }
+    var pendingLockTitle by remember { mutableStateOf("") }
+    var pendingLockAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    val handleLock: (String, () -> Unit) -> Unit = { title, action ->
+        if (isProUser) {
+            action()
+        } else {
+            pendingLockTitle = title
+            pendingLockAction = action
+            showUnlockDialog = true
+        }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -168,7 +184,7 @@ fun BandLockScreen(
                 subtitle = S.presetBand3Subtitle,
                 badge = S.badgeRecommended,
                 lockBtnText = S.lockBtn,
-                onClick = { viewModel.lockBand("4", "Band 3 (1800 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
+                onClick = { handleLock(S.presetBand3Title) { viewModel.lockBand("4", "Band 3 (1800 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) } }
             )
         }
 
@@ -179,7 +195,7 @@ fun BandLockScreen(
                 subtitle = S.presetBand40Subtitle,
                 badge = "ORBIT",
                 lockBtnText = S.lockBtn,
-                onClick = { viewModel.lockBand("8000000000", "Band 40 (2300 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
+                onClick = { handleLock(S.presetBand40Title) { viewModel.lockBand("8000000000", "Band 40 (2300 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) } }
             )
         }
 
@@ -190,7 +206,7 @@ fun BandLockScreen(
                 subtitle = S.presetBand1Subtitle,
                 badge = null,
                 lockBtnText = S.lockBtn,
-                onClick = { viewModel.lockBand("1", "Band 1 (2100 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
+                onClick = { handleLock(S.presetBand1Title) { viewModel.lockBand("1", "Band 1 (2100 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) } }
             )
         }
 
@@ -201,7 +217,7 @@ fun BandLockScreen(
                 subtitle = S.presetBand8Subtitle,
                 badge = S.badgeCoverage,
                 lockBtnText = S.lockBtn,
-                onClick = { viewModel.lockBand("80000000", "Band 8 (900 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
+                onClick = { handleLock(S.presetBand8Title) { viewModel.lockBand("80000000", "Band 8 (900 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) } }
             )
         }
 
@@ -212,7 +228,7 @@ fun BandLockScreen(
                 subtitle = S.presetAutoSubtitle,
                 badge = S.badgeDefault,
                 lockBtnText = S.lockBtn,
-                onClick = { viewModel.lockBand("7FFFFFFFFFFFFFFF", S.presetAutoTitle, S.bandLockSuccessMsg, S.bandLockFailedMsg) }
+                onClick = { handleLock(S.presetAutoTitle) { viewModel.lockBand("7FFFFFFFFFFFFFFF", S.presetAutoTitle, S.bandLockSuccessMsg, S.bandLockFailedMsg) } }
             )
         }
 
@@ -237,7 +253,7 @@ fun BandLockScreen(
                             .clip(RoundedCornerShape(14.dp))
                             .background(CardBackground)
                             .border(1.dp, CardBorder, RoundedCornerShape(14.dp))
-                            .clickable { viewModel.lockBand(hex, name, S.bandLockSuccessMsg, S.bandLockFailedMsg) }
+                            .clickable { handleLock(name) { viewModel.lockBand(hex, name, S.bandLockSuccessMsg, S.bandLockFailedMsg) } }
                             .padding(14.dp)
                     ) {
                         Row(
@@ -269,6 +285,12 @@ fun BandLockScreen(
                         }
                     }
                 }
+            }
+        }
+
+        if (!isProUser) {
+            item {
+                AdmobNativeCard()
             }
         }
 
@@ -342,7 +364,9 @@ fun BandLockScreen(
             Button(
                 onClick = {
                     val hex = LteBand.calculateCombinedHex(selectedBands)
-                    viewModel.lockBand(hex, "${S.customCombinationLabel} ($hex)", S.bandLockSuccessMsg, S.bandLockFailedMsg)
+                    handleLock("${S.customCombinationLabel} ($hex)") {
+                        viewModel.lockBand(hex, "${S.customCombinationLabel} ($hex)", S.bandLockSuccessMsg, S.bandLockFailedMsg)
+                    }
                 },
                 enabled = selectedBands.isNotEmpty() && !isRefreshing,
                 modifier = Modifier
@@ -367,6 +391,17 @@ fun BandLockScreen(
                 )
             }
         }
+    }
+
+    if (showUnlockDialog) {
+        RewardedUnlockDialog(
+            featureTitle = pendingLockTitle,
+            onDismiss = { showUnlockDialog = false },
+            onUnlocked = { pendingLockAction?.invoke() },
+            onUpgradeProClick = {
+                viewModel.setProUser(true)
+            }
+        )
     }
 }
 

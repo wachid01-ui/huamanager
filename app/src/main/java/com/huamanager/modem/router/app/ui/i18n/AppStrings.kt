@@ -219,6 +219,22 @@ interface AppStrings {
     val languageSectionTitle: String
     val languageSectionSubtitle: String
     val activeLanguagePrefix: String
+
+    // Monetization & PRO Tier
+    val proTitle: String
+    val proPrice: String
+    val proSubtitle: String
+    val proUpgradeBtn: String
+    val proActiveBadge: String
+    val proFreeBadge: String
+    val proRestoreBtn: String
+    val proBenefit1: String
+    val proBenefit2: String
+    val proBenefit3: String
+    val rewardUnlockTitle: String
+    val rewardUnlockDesc: String
+    val watchVideoBtn: String
+    val adNotReady: String
 }
 
 val LocalAppStrings = staticCompositionLocalOf<AppStrings> {

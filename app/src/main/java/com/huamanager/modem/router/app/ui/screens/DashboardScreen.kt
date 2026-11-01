@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.huamanager.modem.router.app.data.model.SignalQualityLevel
+import com.huamanager.modem.router.app.ui.ads.AdmobNativeCard
 import com.huamanager.modem.router.app.ui.components.MetricCard
 import com.huamanager.modem.router.app.ui.components.SignalGauge
 import com.huamanager.modem.router.app.ui.i18n.LocalAppStrings
@@ -230,6 +231,13 @@ fun DashboardScreen(
                     rsrpValue = rsrpVal,
                     quality = signal.getOverallQuality()
                 )
+            }
+        }
+
+        val isProUser by viewModel.isProUser.collectAsState()
+        if (!isProUser) {
+            item {
+                AdmobNativeCard()
             }
         }
 
