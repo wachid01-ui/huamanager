@@ -251,9 +251,9 @@ object EnglishStrings : AppStrings {
 
     // Monetization & PRO Tier
     override val proTitle = "HuaManager PRO"
-    override val proPrice = "Rp 29.999"
+    override val proPrice = "Rp 50.000"
     override val proSubtitle = "Remove all ads & instant unlimited access forever"
-    override val proUpgradeBtn = "Upgrade to PRO (Rp 29.999)"
+    override val proUpgradeBtn = "Upgrade to PRO (Rp 50.000)"
     override val proActiveBadge = "PRO ACTIVE"
     override val proFreeBadge = "FREE VERSION"
     override val proRestoreBtn = "Restore Purchase"
