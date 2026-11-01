@@ -23,9 +23,9 @@ enum class AppThemeMode(
         title = "AMOLED Black",
         description = "Hitam pekat 100% untuk layar OLED & hemat baterai"
     ),
-    HUAWEI_RED(
-        title = "Huawei Red",
-        description = "Nuansa merah crimson khas perangkat modem Huawei"
+    CRIMSON_RED(
+        title = "Crimson Red",
+        description = "Nuansa merah crimson modern dan dinamis"
     ),
     EMERALD_GREEN(
         title = "Emerald Matrix",
@@ -45,7 +45,7 @@ enum class AppThemeMode(
             DARK_CYAN -> DarkCyanColors
             LIGHT_CLEAN -> LightCleanColors
             AMOLED_BLACK -> AmoledBlackColors
-            HUAWEI_RED -> HuaweiRedColors
+            CRIMSON_RED -> CrimsonRedColors
             EMERALD_GREEN -> EmeraldGreenColors
             ROYAL_PURPLE -> RoyalPurpleColors
             SOLAR_AMBER -> SolarAmberColors
@@ -89,7 +89,7 @@ enum class AppThemeMode(
 }
 
 @Composable
-fun HuaweiManagerTheme(
+fun HuaManagerTheme(
     themeMode: AppThemeMode = AppThemeMode.DARK_CYAN,
     content: @Composable () -> Unit
 ) {

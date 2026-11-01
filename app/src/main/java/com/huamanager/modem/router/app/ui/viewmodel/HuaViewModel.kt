@@ -19,9 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class HuaweiViewModel(application: Application) : AndroidViewModel(application) {
+class HuaViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val prefs = application.getSharedPreferences("huawei_manager_prefs", Context.MODE_PRIVATE)
+    private val prefs = application.getSharedPreferences("huamanager_prefs", Context.MODE_PRIVATE)
 
     val apiClient = HiLinkApiClient(
         baseUrl = prefs.getString("router_ip", "http://192.168.8.1") ?: "http://192.168.8.1"
@@ -236,7 +236,7 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
             // First attempt
             var result = apiClient.login(cleanUsername, cleanPassword)
 
-            // Orbit Star 2 / Huawei routers often require an immediate confirmation retry
+            // Orbit Star 2 / HiLink routers often require an immediate confirmation retry
             if (!result.isSuccess) {
                 val err = result.exceptionOrNull()?.message ?: ""
                 if (!err.contains("Koneksi terputus") && !err.contains("batas percobaan")) {

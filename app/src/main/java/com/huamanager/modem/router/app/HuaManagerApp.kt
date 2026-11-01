@@ -6,12 +6,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class HuaweiManagerApp : Application() {
+class HuaManagerApp : Application() {
     override fun onCreate() {
         super.onCreate()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                MobileAds.initialize(this@HuaweiManagerApp) {}
+                MobileAds.initialize(this@HuaManagerApp) {}
             } catch (e: Exception) {
                 // ignore
             }

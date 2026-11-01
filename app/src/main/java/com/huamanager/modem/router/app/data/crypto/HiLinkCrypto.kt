@@ -8,7 +8,7 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
-object HuaweiCrypto {
+object HiLinkCrypto {
 
     fun sha256Hex(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
@@ -33,8 +33,8 @@ object HuaweiCrypto {
     }
 
     /**
-     * Compute SCRAM-SHA-256 Client Proof for modern Huawei routers (e.g., Orbit Star 2/B311/B312/B535)
-     * NOTE: Huawei routers swap the HMAC key/data parameters compared to RFC 5802:
+     * Compute SCRAM-SHA-256 Client Proof for modern router models (e.g., Orbit Star 2/B311/B312/B535)
+     * NOTE: Proprietary routers swap the HMAC key/data parameters compared to RFC 5802:
      * - ClientKey = HMAC(key="Client Key", data=SaltedPassword)
      * - ClientSignature = HMAC(key=AuthMessage, data=StoredKey)
      */
@@ -52,15 +52,15 @@ object HuaweiCrypto {
             val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
             val saltedPassword = skf.generateSecret(spec).encoded
 
-            // Huawei parameter swap:
+            // HiLink parameter swap:
             // Standard: HMAC(key=SaltedPassword, data="Client Key")
-            // Huawei:   HMAC(key="Client Key", data=SaltedPassword)
+            // HiLink:   HMAC(key="Client Key", data=SaltedPassword)
             val clientKey = hmacSha256("Client Key".toByteArray(StandardCharsets.UTF_8), saltedPassword)
             val storedKey = MessageDigest.getInstance("SHA-256").digest(clientKey)
 
-            // Huawei parameter swap:
+            // HiLink parameter swap:
             // Standard: HMAC(key=StoredKey, data=AuthMessage)
-            // Huawei:   HMAC(key=AuthMessage, data=StoredKey)
+            // HiLink:   HMAC(key=AuthMessage, data=StoredKey)
             val clientSignature = hmacSha256(authMsg.toByteArray(StandardCharsets.UTF_8), storedKey)
 
             val clientProof = ByteArray(clientKey.size)

@@ -1,7 +1,7 @@
 package com.huamanager.modem.router.app.data.api
 
 import android.util.Log
-import com.huamanager.modem.router.app.data.crypto.HuaweiCrypto
+import com.huamanager.modem.router.app.data.crypto.HiLinkCrypto
 import com.huamanager.modem.router.app.data.model.DeviceInfo
 import com.huamanager.modem.router.app.data.model.NetworkStatus
 import com.huamanager.modem.router.app.data.model.SignalInfo
@@ -231,9 +231,9 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                 val iterations = extractXmlTag(challengeBody, "iterations").toIntOrNull() ?: 100
                 val serverNonce = extractXmlTag(challengeBody, "servernonce")
                 
-                // Huawei SCRAM AuthMessage: clientNonce,serverNonce,serverNonce
+                // SCRAM AuthMessage: clientNonce,serverNonce,serverNonce
                 val authMsg = "$clientNonce,$serverNonce,$serverNonce"
-                val clientProof = HuaweiCrypto.computeScramClientProof(cleanPassword, salt, iterations, authMsg)
+                val clientProof = HiLinkCrypto.computeScramClientProof(cleanPassword, salt, iterations, authMsg)
 
                 if (clientProof.isNotEmpty()) {
                     val authXml = """
@@ -273,7 +273,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
                     // If error indicates password mismatch, try standard RFC 5802 SCRAM variant
                     if (errCode == "108002" || errCode == "108006" || errCode == "108007") {
-                        val stdProof = HuaweiCrypto.computeStandardScramClientProof(cleanPassword, salt, iterations, authMsg)
+                        val stdProof = HiLinkCrypto.computeStandardScramClientProof(cleanPassword, salt, iterations, authMsg)
                         if (stdProof.isNotEmpty() && stdProof != clientProof) {
                             val stdXml = """
                                 <?xml version="1.0" encoding="UTF-8"?>
@@ -296,7 +296,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                             }
                         }
 
-                        val errMsg = parseHuaweiErrorMessage(authBody, "Password admin modem salah.")
+                        val errMsg = parseHiLinkErrorMessage(authBody, "Password admin modem salah.")
                         return@withContext Result.failure(Exception(errMsg))
                     }
 
@@ -306,7 +306,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
             // Step 2: Standard HiLink login (B310, B315, E5577, E5573)
             refreshTokens()
-            val passwordHash = HuaweiCrypto.createHiLinkPassword(cleanUsername, cleanPassword, currentToken)
+            val passwordHash = HiLinkCrypto.createHiLinkPassword(cleanUsername, cleanPassword, currentToken)
             val loginXml = """
                 <?xml version="1.0" encoding="UTF-8"?>
                 <request>
@@ -361,7 +361,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                 }
             }
 
-            val friendlyMsg = parseHuaweiErrorMessage(loginBody, "Login gagal.")
+            val friendlyMsg = parseHiLinkErrorMessage(loginBody, "Login gagal.")
             Result.failure(Exception(friendlyMsg))
         } catch (e: Exception) {
             val netError = e.message ?: "Koneksi terputus"
@@ -530,7 +530,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
             Result.success(
                 DeviceInfo(
-                    deviceName = extractXmlTag(body, "DeviceName").ifEmpty { "Huawei Router" },
+                    deviceName = extractXmlTag(body, "DeviceName").ifEmpty { "4G Router" },
                     hardwareVersion = extractXmlTag(body, "HardwareVersion"),
                     softwareVersion = extractXmlTag(body, "SoftwareVersion"),
                     webUIVersion = extractXmlTag(body, "WebUIVersion"),
@@ -865,7 +865,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
         return bytes.joinToString("") { "%02x".format(it) }
     }
 
-    fun parseHuaweiErrorMessage(xml: String, defaultMsg: String): String {
+    fun parseHiLinkErrorMessage(xml: String, defaultMsg: String): String {
         val code = extractXmlTag(xml, "code")
         return when (code) {
             "108001" -> "Username atau pengguna tidak ditemukan (Pastikan username benar, default: admin)."

@@ -48,11 +48,11 @@ import com.huamanager.modem.router.app.ui.screens.TowerScreen
 import com.huamanager.modem.router.app.ui.theme.AccentPrimary
 import com.huamanager.modem.router.app.ui.theme.CardBackground
 import com.huamanager.modem.router.app.ui.theme.DarkBackground
-import com.huamanager.modem.router.app.ui.theme.HuaweiManagerTheme
+import com.huamanager.modem.router.app.ui.theme.HuaManagerTheme
 import com.huamanager.modem.router.app.ui.theme.OnAccentColor
 import com.huamanager.modem.router.app.ui.theme.TextMuted
 import com.huamanager.modem.router.app.ui.theme.TextPrimary
-import com.huamanager.modem.router.app.ui.viewmodel.HuaweiViewModel
+import com.huamanager.modem.router.app.ui.viewmodel.HuaViewModel
 
 data class NavItem(
     val title: String,
@@ -61,7 +61,7 @@ data class NavItem(
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: HuaweiViewModel by viewModels()
+    private val viewModel: HuaViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
             val appLanguage by viewModel.appLanguage.collectAsState()
 
             CompositionLocalProvider(LocalAppStrings provides appLanguage.strings) {
-                HuaweiManagerTheme(themeMode = appTheme) {
+                HuaManagerTheme(themeMode = appTheme) {
                     MainAppScreen(viewModel = viewModel)
                 }
             }
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainAppScreen(viewModel: HuaweiViewModel) {
+fun MainAppScreen(viewModel: HuaViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
     val toastMessage by viewModel.toastMessage.collectAsState()

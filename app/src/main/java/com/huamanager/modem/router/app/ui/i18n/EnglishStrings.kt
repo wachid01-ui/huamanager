@@ -127,7 +127,7 @@ object EnglishStrings : AppStrings {
     override fun getAntennaPointingAdvice(bearing: String, physicalSector: Int, lcidText: String): String =
         "The BTS tower is estimated to be located to the $bearing of your position (transmitter antenna Sector $physicalSector$lcidText beams toward your location). Aim your external antenna (Yagi/LPDA) towards $bearing."
 
-    override val towerCopyHeader = "=== HUAWEI MODEM BTS CELL TOWER DATA ==="
+    override val towerCopyHeader = "=== 4G ROUTER BTS CELL TOWER DATA ==="
     override val towerCopyTowerLoc = "Tower Location"
     override val towerCopyAimDir = "Antenna Aim"
     override val towerCopyPosPrefix = "Located to the %s of your position"
@@ -211,7 +211,7 @@ object EnglishStrings : AppStrings {
     override val logoutSuccess = "Successfully logged out from modem"
     override val loginFailed = "Login failed"
     override val tipsTitle = "Modem Login Instructions & Tips"
-    override val tip1 = "1. Ensure your Android device is connected to the Huawei modem's Wi-Fi network (not mobile data)."
+    override val tip1 = "1. Ensure your Android device is connected to the router's Wi-Fi network (not mobile data)."
     override val tip2 = "2. The admin password is usually printed on the sticker beneath the router or created during initial setup."
     override val tip3 = "3. Use the eye icon button to verify character casing (uppercase/lowercase) and avoid typos."
     override val tip4 = "4. The app automatically persists your login session so you stay logged in until you tap Logout."
@@ -222,7 +222,7 @@ object EnglishStrings : AppStrings {
     override val mobileDataOn = "Mobile data enabled"
     override val mobileDataOff = "Mobile data disabled"
     override val rebootConfirmTitle = "Confirm Modem Reboot"
-    override val rebootConfirmMsg = "Are you sure you want to restart your Huawei modem now? Internet connection will be interrupted during the reboot process (approx. 1-2 minutes)."
+    override val rebootConfirmMsg = "Are you sure you want to restart your modem router now? Internet connection will be interrupted during the reboot process (approx. 1-2 minutes)."
     override val rebootProgressMsg = "Modem is rebooting..."
     override val rebootFailedMsg = "Reboot failed"
     override val ussdTitle = "Carrier USSD Codes"

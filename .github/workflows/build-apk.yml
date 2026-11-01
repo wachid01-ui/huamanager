@@ -52,7 +52,7 @@ jobs:
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: HuaweiManager-Debug-APK
+          name: HuaManager-Debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 14
 
@@ -64,6 +64,6 @@ jobs:
           RELEASE_TAG="v1.0.0-build-$(date +'%Y%m%d-%H%M%S')"
           echo "Creating Release $RELEASE_TAG..."
           gh release create "$RELEASE_TAG" app/build/outputs/apk/debug/app-debug.apk \
-            --title "Huawei Manager APK ($RELEASE_TAG)" \
-            --notes "File APK Huawei Manager Android siap install. Download file app-debug.apk di bawah ini dan install ke HP Android Anda." \
+            --title "HuaManager APK ($RELEASE_TAG)" \
+            --notes "File APK HuaManager Android siap install. Download file app-debug.apk di bawah ini dan install ke HP Android Anda." \
             || echo "Release creation skipped or already exists."

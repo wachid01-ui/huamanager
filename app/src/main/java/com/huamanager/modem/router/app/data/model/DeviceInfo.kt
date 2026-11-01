@@ -1,7 +1,7 @@
 package com.huamanager.modem.router.app.data.model
 
 data class DeviceInfo(
-    val deviceName: String = "Huawei Router",
+    val deviceName: String = "4G Router",
     val hardwareVersion: String = "-",
     val softwareVersion: String = "-",
     val webUIVersion: String = "-",

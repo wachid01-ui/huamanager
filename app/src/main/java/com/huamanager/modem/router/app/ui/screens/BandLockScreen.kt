@@ -59,11 +59,11 @@ import com.huamanager.modem.router.app.ui.theme.SignalPoor
 import com.huamanager.modem.router.app.ui.theme.TextMuted
 import com.huamanager.modem.router.app.ui.theme.TextPrimary
 import com.huamanager.modem.router.app.ui.theme.TextSecondary
-import com.huamanager.modem.router.app.ui.viewmodel.HuaweiViewModel
+import com.huamanager.modem.router.app.ui.viewmodel.HuaViewModel
 
 @Composable
 fun BandLockScreen(
-    viewModel: HuaweiViewModel,
+    viewModel: HuaViewModel,
     modifier: Modifier = Modifier
 ) {
     val S = LocalAppStrings.current

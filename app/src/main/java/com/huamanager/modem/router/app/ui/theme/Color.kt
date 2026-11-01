@@ -151,8 +151,8 @@ val AmoledBlackColors = AppColors(
     onAccent = Color.Black
 )
 
-// 4. Huawei Red (Merah Crimson Khas Huawei)
-val HuaweiRedColors = AppColors(
+// 4. Crimson Red (Merah Crimson Modern)
+val CrimsonRedColors = AppColors(
     isLight = false,
     background = Color(0xFF140D0F),
     surface = Color(0xFF1E1317),

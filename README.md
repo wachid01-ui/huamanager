@@ -1,6 +1,6 @@
-# Huawei Manager - Aplikasi Android (Kotlin & Jetpack Compose)
+# HuaManager - Aplikasi Android (Kotlin & Jetpack Compose)
 
-Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), membaca/kirim SMS, dan mengelola modem/router Huawei 4G LTE (seperti seri Huawei B310, B311, B312, B315, B525, B535, Telkomsel Orbit Star 1/2/3, MiFi E5577, dll.).
+Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), membaca/kirim SMS, dan mengelola modem/router 4G LTE (seperti seri B310, B311, B312, B315, B525, B535, Telkomsel Orbit Star 1/2/3, MiFi E5577, dll.).
 
 ---
 
@@ -42,7 +42,7 @@ Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), memb
 5. **Alat & Kontrol Router (Tools)**
    - **Konfigurasi IP Modem**: Ubah IP gateway sesuai router Anda (default: `192.168.8.1`).
    - **Autentikasi Aman**: Mendukung router lawas (HiLink standard) maupun router modern/Orbit (SCRAM-SHA-256).
-   - **Reboot Modem**: Restart router Huawei langsung dari HP dengan konfirmasi keamanan.
+   - **Reboot Modem**: Restart router modem langsung dari HP dengan konfirmasi keamanan.
    - **Saklar Data Seluler**: Nyalakan atau matikan sambungan mobile data modem.
    - **Tool Dial USSD**: Kirim perintah USSD (seperti `*888#` atau `*363#`) dan terima balasannya langsung di layar.
    - **Detail Informasi Perangkat**: Nama model, IMEI, IMSI, versi Firmware, versi WebUI, dan MAC Address.
@@ -66,7 +66,7 @@ Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), memb
    - Pilih menu **File** -> **Open...**
    - Arahkan ke folder:
      ```
-     C:\Users\wachi\.gemini\antigravity\scratch\huawei-manager-android
+     C:\Users\wachi\.gemini\antigravity\scratch\huamanager
      ```
    - Tunggu proses Gradle Sync selesai mengunduh library yang dibutuhkan.
 
@@ -78,12 +78,12 @@ Aplikasi Android modern untuk memonitor, mengunci frekuensi (band locking), memb
 
 3. **Install di HP Android**:
    - Kirim atau copy file `app-debug.apk` ke HP Android Anda.
-   - Pastikan HP Android Anda terhubung ke jaringan **WiFi dari modem Huawei tersebut**.
-   - Buka aplikasi **Huawei Manager**, lalu monitor sinyal atau kunci band sesuai kebutuhan Anda!
+   - Pastikan HP Android Anda terhubung ke jaringan **WiFi dari modem/router tersebut**.
+   - Buka aplikasi **HuaManager**, lalu monitor sinyal atau kunci band sesuai kebutuhan Anda!
 
 ---
 
 ## 💡 Catatan Penggunaan
 
-- **Koneksi WiFi**: HP Android **wajib** terhubung ke WiFi modem Huawei agar aplikasi dapat berkomunikasi dengan API router di `192.168.8.1`.
-- **Login Password**: Untuk memonitor sinyal (RSRP/SINR), sebagian besar modem Huawei tidak memerlukan password login. Namun untuk **Kunci Band (Band Locking)**, **Kirim/Hapus SMS**, dan **Reboot**, silakan masukkan password admin WebUI Anda di tab **Alat** lalu klik **Login**.
+- **Koneksi WiFi**: HP Android **wajib** terhubung ke WiFi modem router agar aplikasi dapat berkomunikasi dengan API router di `192.168.8.1`.
+- **Login Password**: Untuk memonitor sinyal (RSRP/SINR), sebagian besar modem router tidak memerlukan password login. Namun untuk **Kunci Band (Band Locking)**, **Kirim/Hapus SMS**, dan **Reboot**, silakan masukkan password admin WebUI Anda di tab **Alat** lalu klik **Login**.

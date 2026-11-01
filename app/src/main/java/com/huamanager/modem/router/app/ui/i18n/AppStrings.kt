@@ -3,7 +3,7 @@ package com.huamanager.modem.router.app.ui.i18n
 import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
- * Interface defining all localized strings used across Huawei Manager Android
+ * Interface defining all localized strings used across HuaManager Android
  */
 interface AppStrings {
     // Navigation items

@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HuaweiManager"
+rootProject.name = "HuaManager"
 include(":app")

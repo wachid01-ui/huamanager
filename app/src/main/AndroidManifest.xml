@@ -6,13 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
-        android:name=".HuaweiManagerApp"
+        android:name=".HuaManagerApp"
         android:allowBackup="true"
         android:icon="@android:drawable/ic_dialog_info"
         android:label="@string/app_name"
         android:roundIcon="@android:drawable/ic_dialog_info"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HuaweiManager"
+        android:theme="@style/Theme.HuaManager"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config">
 
@@ -26,7 +26,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.HuaweiManager">
+            android:theme="@style/Theme.HuaManager">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -127,7 +127,7 @@ object IndonesianStrings : AppStrings {
     override fun getAntennaPointingAdvice(bearing: String, physicalSector: Int, lcidText: String): String =
         "Menara BTS diperkirakan berada di sebelah $bearing dari lokasi Anda (karena antena pemancar Sektor $physicalSector$lcidText menembak ke arah rumah Anda). Arahkan antena luar (Yagi/LPDA) menghadap ke arah $bearing."
 
-    override val towerCopyHeader = "=== DATA MENARA BTS MODEM HUAWEI ==="
+    override val towerCopyHeader = "=== DATA MENARA BTS ROUTER 4G ==="
     override val towerCopyTowerLoc = "Letak Menara"
     override val towerCopyAimDir = "Arah Pointing"
     override val towerCopyPosPrefix = "Di sebelah %s posisi Anda"
@@ -179,7 +179,7 @@ object IndonesianStrings : AppStrings {
 
     // SMS
     override val smsTitle = "Pesan SMS Kartu SIM Modem"
-    override val smsSubtitle = "Kelola dan baca pesan SMS yang masuk ke kartu SIM di dalam modem Huawei"
+    override val smsSubtitle = "Kelola dan baca pesan SMS yang masuk ke kartu SIM di dalam router"
     override val sendSmsCardTitle = "Kirim SMS Baru"
     override val sendSmsCardSubtitle = "Kirim SMS melalui kartu SIM modem langsung dari aplikasi"
     override val recipientPhoneLabel = "Nomor Telepon Tujuan (contoh: 08123456789)"
@@ -211,7 +211,7 @@ object IndonesianStrings : AppStrings {
     override val logoutSuccess = "Berhasil logout dari modem"
     override val loginFailed = "Login gagal"
     override val tipsTitle = "Petunjuk Penggunaan Login Modem"
-    override val tip1 = "1. Pastikan HP Android Anda terhubung ke jaringan WiFi modem Huawei (bukan data seluler HP)."
+    override val tip1 = "1. Pastikan HP Android Anda terhubung ke jaringan WiFi router modem (bukan data seluler HP)."
     override val tip2 = "2. Password admin modem biasanya tercantum di stiker bawah router atau password WebUI yang Anda buat saat pertama kali aktivasi."
     override val tip3 = "3. Gunakan ikon mata pada kolom password untuk memastikan huruf besar/kecil (kapital) dan simbol sudah sesuai tanpa salah ketik."
     override val tip4 = "4. Aplikasi otomatis menyimpan sesi login sehingga Anda tetap login setiap kali membuka aplikasi sampai menekan tombol Logout."
@@ -222,7 +222,7 @@ object IndonesianStrings : AppStrings {
     override val mobileDataOn = "Data seluler diaktifkan"
     override val mobileDataOff = "Data seluler dimatikan"
     override val rebootConfirmTitle = "Konfirmasi Restart Modem"
-    override val rebootConfirmMsg = "Apakah Anda yakin ingin me-restart modem Huawei sekarang? Koneksi internet akan terputus selama proses restart (sekitar 1-2 menit)."
+    override val rebootConfirmMsg = "Apakah Anda yakin ingin me-restart modem router sekarang? Koneksi internet akan terputus selama proses restart (sekitar 1-2 menit)."
     override val rebootProgressMsg = "Modem sedang reboot..."
     override val rebootFailedMsg = "Gagal reboot"
     override val ussdTitle = "USSD Operator"
