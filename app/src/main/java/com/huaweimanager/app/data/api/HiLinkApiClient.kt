@@ -7,6 +7,7 @@ import com.huaweimanager.app.data.model.NetworkStatus
 import com.huaweimanager.app.data.model.SignalInfo
 import com.huaweimanager.app.data.model.SmsMessage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -31,23 +32,11 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
     private var currentToken: String = ""
     private var currentSession: String = ""
+    private val sessionCookies = java.util.concurrent.ConcurrentHashMap<String, String>()
     var isLoggedIn: Boolean = false
         private set
 
-    // In-memory cookie jar to retain session cookies across requests
-    private val cookieStore = HashMap<String, MutableList<Cookie>>()
-    private val cookieJar = object : CookieJar {
-        override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-            cookieStore[url.host] = cookies.toMutableList()
-        }
-
-        override fun loadForRequest(url: HttpUrl): List<Cookie> {
-            return cookieStore[url.host] ?: ArrayList()
-        }
-    }
-
     private val client = OkHttpClient.Builder()
-        .cookieJar(cookieJar)
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(8, TimeUnit.SECONDS)
         .writeTimeout(8, TimeUnit.SECONDS)
@@ -61,14 +50,12 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             }
 
             // Attach SessionID cookie properly without duplicate prefix
-            if (currentSession.isNotEmpty()) {
-                val cleanSession = currentSession.trim().removeSuffix(";")
-                val cookieVal = if (cleanSession.startsWith("SessionID=")) {
-                    cleanSession
-                } else {
-                    "SessionID=$cleanSession"
-                }
+            if (sessionCookies.isNotEmpty()) {
+                val cookieVal = sessionCookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
                 requestBuilder.header("Cookie", cookieVal)
+            } else if (currentSession.isNotEmpty()) {
+                val cleanSession = currentSession.trim().removePrefix("SessionID=").removeSuffix(";")
+                requestBuilder.header("Cookie", "SessionID=$cleanSession")
             }
 
             requestBuilder.header("X-Requested-With", "XMLHttpRequest")
@@ -86,11 +73,18 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
             // Track SessionID cookie from Set-Cookie headers if provided
             val setCookies = response.headers("Set-Cookie")
-            for (cookie in setCookies) {
-                if (cookie.contains("SessionID=")) {
-                    val match = Regex("SessionID=([^;]+)").find(cookie)
-                    match?.let {
-                        currentSession = it.value
+            for (cookieHeader in setCookies) {
+                val parts = cookieHeader.split(";")
+                if (parts.isNotEmpty()) {
+                    val nameValue = parts[0].trim()
+                    val eqIdx = nameValue.indexOf('=')
+                    if (eqIdx > 0) {
+                        val name = nameValue.substring(0, eqIdx).trim()
+                        val value = nameValue.substring(eqIdx + 1).trim()
+                        sessionCookies[name] = value
+                        if (name.equals("SessionID", ignoreCase = true)) {
+                            currentSession = value
+                        }
                     }
                 }
             }
@@ -98,6 +92,13 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             response
         }
         .build()
+
+    fun clearSession() {
+        isLoggedIn = false
+        currentSession = ""
+        currentToken = ""
+        sessionCookies.clear()
+    }
 
     fun updateBaseUrl(ip: String) {
         var cleanIp = ip.trim()
@@ -126,7 +127,11 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             if (response.isSuccessful && body.contains("<response>")) {
                 val ses = extractXmlTag(body, "SesInfo")
                 val tok = extractXmlTag(body, "TokInfo")
-                if (ses.isNotEmpty()) currentSession = ses
+                if (ses.isNotEmpty()) {
+                    val cleanSes = ses.removePrefix("SessionID=").removeSuffix(";")
+                    currentSession = cleanSes
+                    sessionCookies["SessionID"] = cleanSes
+                }
                 if (tok.isNotEmpty()) currentToken = tok
                 return@withContext true
             }
@@ -173,30 +178,59 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
         }
     }
 
+    fun cleanSecret(input: String): String {
+        return input.trim()
+            .replace("\u200B", "") // zero-width space
+            .replace("\u200C", "") // zero-width non-joiner
+            .replace("\u200D", "") // zero-width joiner
+            .replace("\uFEFF", "") // zero-width no-break space (BOM)
+            .replace("\u00A0", "") // non-breaking space
+    }
+
     /**
-     * Authenticate with the router supporting both modern SCRAM-SHA-256 and standard HiLink
+     * Authenticate with the router supporting both modern SCRAM-SHA-256 and standard HiLink.
+     * Includes automatic handshake recovery so login succeeds reliably on first attempt.
      */
     suspend fun login(username: String = "admin", password: String): Result<Boolean> = withContext(Dispatchers.IO) {
-        try {
-            val cleanUsername = username.trim()
-            val cleanPassword = password.trim()
-            refreshTokens()
+        val cleanUsername = username.trim()
+        val cleanPassword = cleanSecret(password)
 
-            // Step 0: Check current login status from router
-            try {
-                val checkStateReq = Request.Builder()
-                    .url("$baseUrl/api/user/state-login")
-                    .get()
-                    .build()
-                val checkStateRes = client.newCall(checkStateReq).execute()
-                val stateBody = checkStateRes.body?.string() ?: ""
-                val currentState = extractXmlTag(stateBody, "State")
-                if (currentState == "0") {
-                    isLoggedIn = true
-                    return@withContext Result.success(true)
-                }
-            } catch (e: Exception) {
-                Log.w(TAG, "State login check skipped: ${e.message}")
+        if (cleanPassword.isEmpty()) {
+            return@withContext Result.failure(Exception("Password tidak boleh kosong"))
+        }
+
+        var lastError: Exception? = null
+        for (attempt in 1..2) {
+            val result = executeLoginHandshake(cleanUsername, cleanPassword)
+            if (result.isSuccess) {
+                return@withContext result
+            }
+
+            val err = result.exceptionOrNull() as? Exception ?: Exception("Login gagal")
+            lastError = err
+
+            // If the failure was an explicit incorrect password, don't retry (save retry lockout attempts)
+            val msg = err.message ?: ""
+            if (msg.contains("Password admin modem salah") || msg.contains("108002")) {
+                return@withContext result
+            }
+
+            // Brief pause before clean retry
+            if (attempt == 1) {
+                delay(350)
+            }
+        }
+
+        Result.failure(lastError ?: Exception("Login gagal"))
+    }
+
+    private suspend fun executeLoginHandshake(cleanUsername: String, cleanPassword: String): Result<Boolean> {
+        try {
+            // Step 0: Reset session state and retrieve a fresh session token pair for login
+            clearSession()
+            val tokenReady = refreshTokens()
+            if (!tokenReady) {
+                return Result.failure(Exception("Gagal mengambil token sesi modem. Pastikan HP terhubung ke WiFi router."))
             }
 
             // Step 1: Try modern SCRAM challenge_login first (B311, B312, B535, Orbit Star, SoyeaLink)
@@ -261,14 +295,14 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
                     if (authBody.contains("<response>OK</response>")) {
                         isLoggedIn = true
-                        return@withContext Result.success(true)
+                        return Result.success(true)
                     }
 
                     val errCode = extractXmlTag(authBody, "code")
                     if (errCode == "108003") {
                         // User is already logged in
                         isLoggedIn = true
-                        return@withContext Result.success(true)
+                        return Result.success(true)
                     }
 
                     // If error indicates password mismatch, try standard RFC 5802 SCRAM variant
@@ -292,15 +326,13 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                             val stdBody = stdRes.body?.string() ?: ""
                             if (stdBody.contains("<response>OK</response>") || extractXmlTag(stdBody, "code") == "108003") {
                                 isLoggedIn = true
-                                return@withContext Result.success(true)
+                                return Result.success(true)
                             }
                         }
 
                         val errMsg = parseHuaweiErrorMessage(authBody, "Password admin modem salah.")
-                        return@withContext Result.failure(Exception(errMsg))
+                        return Result.failure(Exception(errMsg))
                     }
-
-                    // If not password error, fallback to legacy login
                 }
             }
 
@@ -326,13 +358,13 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
 
             if (loginBody.contains("<response>OK</response>")) {
                 isLoggedIn = true
-                return@withContext Result.success(true)
+                return Result.success(true)
             }
 
             val loginErrCode = extractXmlTag(loginBody, "code")
             if (loginErrCode == "108003") {
                 isLoggedIn = true
-                return@withContext Result.success(true)
+                return Result.success(true)
             }
 
             // Step 3: Fallback for older routers (password_type 0)
@@ -357,7 +389,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                 val fallbackBody = fallbackResponse.body?.string() ?: ""
                 if (fallbackBody.contains("<response>OK</response>") || extractXmlTag(fallbackBody, "code") == "108003") {
                     isLoggedIn = true
-                    return@withContext Result.success(true)
+                    return Result.success(true)
                 }
             }
 
@@ -387,20 +419,12 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                 .build()
 
             client.newCall(request).execute()
-
-            isLoggedIn = false
-            currentSession = ""
-            currentToken = ""
-            cookieStore.clear()
-
-            Result.success(true)
         } catch (e: Exception) {
-            isLoggedIn = false
-            currentSession = ""
-            currentToken = ""
-            cookieStore.clear()
-            Result.success(true)
+            Log.w(TAG, "Logout error: ${e.message}")
+        } finally {
+            clearSession()
         }
+        Result.success(true)
     }
 
     /**

@@ -201,6 +201,13 @@ fun ToolsScreen(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Done
                         ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                if (password.isNotBlank() && !isRefreshing) {
+                                    viewModel.login(password = password, username = inputUsername)
+                                }
+                            }
+                        ),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
