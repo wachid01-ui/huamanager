@@ -94,6 +94,44 @@ object IndonesianStrings : AppStrings {
     override val directionSouthEast = "Tenggara"
     override val directionSouthWest = "Barat Daya"
     override val directionNorthWest = "Barat Laut"
+    override val sectorWord = "Sektor"
+    override val frequencyLabel = "Frekuensi"
+    override val bearingSouthOrSouthwest = "SELATAN (atau Barat Daya)"
+    override val bearingNorthOrNorthwest = "UTARA (atau Barat Laut)"
+    override val bearingEastOrSoutheast = "TIMUR (atau Tenggara)"
+    override val bearingSouth = "SELATAN"
+    override val sectorUnknown = "Sektor tidak diketahui"
+
+    override fun getEstimatedTowerBearing(physicalSector: Int): String {
+        return when (physicalSector) {
+            1 -> bearingSouthOrSouthwest
+            2 -> bearingNorthOrNorthwest
+            3 -> bearingEastOrSoutheast
+            else -> bearingSouth
+        }
+    }
+
+    override fun getSectorAzimuthDescription(physicalSector: Int, lcid: Int?): String {
+        val lcidStr = if (lcid != null) " (LCID $lcid)" else ""
+        return when (physicalSector) {
+            1 -> "Sektor Fisik 1$lcidStr: Menghadap ~0° - 120° (Utara – Timur Laut)"
+            2 -> "Sektor Fisik 2$lcidStr: Menghadap ~120° - 240° (Tenggara – Selatan)"
+            3 -> "Sektor Fisik 3$lcidStr: Menghadap ~240° - 360° (Barat Laut – Barat)"
+            else -> "Sektor Fisik $physicalSector$lcidStr"
+        }
+    }
+
+    override fun sectorCarrierNote(lcid: Int, physicalSector: Int): String =
+        "Info Sektor: Angka $lcid adalah Local Cell ID (LCID) operator. Operator seluler memakai seri 100-an untuk membedakan frekuensi/carrier ke-3, yang secara fisik mengarah ke Sektor $physicalSector."
+
+    override fun getAntennaPointingAdvice(bearing: String, physicalSector: Int, lcidText: String): String =
+        "Menara BTS diperkirakan berada di sebelah $bearing dari lokasi Anda (karena antena pemancar Sektor $physicalSector$lcidText menembak ke arah rumah Anda). Arahkan antena luar (Yagi/LPDA) menghadap ke arah $bearing."
+
+    override val towerCopyHeader = "=== DATA MENARA BTS MODEM HUAWEI ==="
+    override val towerCopyTowerLoc = "Letak Menara"
+    override val towerCopyAimDir = "Arah Pointing"
+    override val towerCopyPosPrefix = "Di sebelah %s posisi Anda"
+    override val towerCopyAimPrefix = "Hadapkan antena luar ke %s"
 
     // Band Lock
     override val bandLockTitle = "Kunci Band LTE / Frekuensi 4G"

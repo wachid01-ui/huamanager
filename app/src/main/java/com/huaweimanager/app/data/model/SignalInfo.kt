@@ -1,5 +1,7 @@
 package com.huaweimanager.app.data.model
 
+import com.huaweimanager.app.ui.i18n.AppStrings
+
 enum class SignalQualityLevel {
     EXCELLENT, GOOD, FAIR, POOR, UNKNOWN
 }
@@ -126,9 +128,13 @@ data class SignalInfo(
     /**
      * Estimated sector antenna azimuth direction
      */
-    fun getSectorAzimuthDescription(): String {
+    fun getSectorAzimuthDescription(strings: AppStrings? = null): String {
         val physical = getPhysicalSectorNumber()
-        val lcid = getCalculatedSectorId() ?: return "Sektor tidak diketahui"
+        val lcid = getCalculatedSectorId()
+        if (strings != null) {
+            return strings.getSectorAzimuthDescription(physical, lcid)
+        }
+        if (lcid == null) return "Sektor tidak diketahui"
         return when (physical) {
             1 -> "Sektor Fisik 1 (LCID $lcid): Menghadap ~0° - 120° (Utara – Timur Laut)"
             2 -> "Sektor Fisik 2 (LCID $lcid): Menghadap ~120° - 240° (Tenggara – Selatan)"
@@ -140,8 +146,12 @@ data class SignalInfo(
     /**
      * Perkiraan letak posisi menara BTS relatif dari lokasi rumah pengguna
      */
-    fun getEstimatedTowerBearing(): String {
-        return when (getPhysicalSectorNumber()) {
+    fun getEstimatedTowerBearing(strings: AppStrings? = null): String {
+        val physical = getPhysicalSectorNumber()
+        if (strings != null) {
+            return strings.getEstimatedTowerBearing(physical)
+        }
+        return when (physical) {
             1 -> "SELATAN (atau Barat Daya)"
             2 -> "UTARA (atau Barat Laut)"
             3 -> "TIMUR (atau Tenggara)"
@@ -152,11 +162,14 @@ data class SignalInfo(
     /**
      * Panduan rekomendasi arah hadap pointing antena luar
      */
-    fun getAntennaPointingAdvice(): String {
-        val bearing = getEstimatedTowerBearing()
+    fun getAntennaPointingAdvice(strings: AppStrings? = null): String {
+        val bearing = getEstimatedTowerBearing(strings)
         val physical = getPhysicalSectorNumber()
         val lcid = getCalculatedSectorId() ?: 0
         val lcidText = if (lcid > 0) " (LCID: $lcid)" else ""
+        if (strings != null) {
+            return strings.getAntennaPointingAdvice(bearing, physical, lcidText)
+        }
         return "Menara BTS diperkirakan berada di sebelah $bearing dari lokasi Anda (karena antena pemancar Sektor $physical$lcidText menembak ke arah rumah Anda). Arahkan antena luar (Yagi/LPDA) menghadap ke arah $bearing."
     }
 

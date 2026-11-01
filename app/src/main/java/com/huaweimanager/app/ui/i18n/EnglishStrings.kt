@@ -94,6 +94,44 @@ object EnglishStrings : AppStrings {
     override val directionSouthEast = "Southeast"
     override val directionSouthWest = "Southwest"
     override val directionNorthWest = "Northwest"
+    override val sectorWord = "Sector"
+    override val frequencyLabel = "Frequency"
+    override val bearingSouthOrSouthwest = "SOUTH (or Southwest)"
+    override val bearingNorthOrNorthwest = "NORTH (or Northwest)"
+    override val bearingEastOrSoutheast = "EAST (or Southeast)"
+    override val bearingSouth = "SOUTH"
+    override val sectorUnknown = "Unknown Sector"
+
+    override fun getEstimatedTowerBearing(physicalSector: Int): String {
+        return when (physicalSector) {
+            1 -> bearingSouthOrSouthwest
+            2 -> bearingNorthOrNorthwest
+            3 -> bearingEastOrSoutheast
+            else -> bearingSouth
+        }
+    }
+
+    override fun getSectorAzimuthDescription(physicalSector: Int, lcid: Int?): String {
+        val lcidStr = if (lcid != null) " (LCID $lcid)" else ""
+        return when (physicalSector) {
+            1 -> "Physical Sector 1$lcidStr: Facing ~0° - 120° (North – Northeast)"
+            2 -> "Physical Sector 2$lcidStr: Facing ~120° - 240° (Southeast – South)"
+            3 -> "Physical Sector 3$lcidStr: Facing ~240° - 360° (Northwest – West)"
+            else -> "Physical Sector $physicalSector$lcidStr"
+        }
+    }
+
+    override fun sectorCarrierNote(lcid: Int, physicalSector: Int): String =
+        "Sector Info: Number $lcid is the mobile operator's Local Cell ID (LCID). Operators use the 100-series to differentiate the 3rd carrier frequency, which physically points towards Sector $physicalSector."
+
+    override fun getAntennaPointingAdvice(bearing: String, physicalSector: Int, lcidText: String): String =
+        "The BTS tower is estimated to be located to the $bearing of your position (transmitter antenna Sector $physicalSector$lcidText beams toward your location). Aim your external antenna (Yagi/LPDA) towards $bearing."
+
+    override val towerCopyHeader = "=== HUAWEI MODEM BTS CELL TOWER DATA ==="
+    override val towerCopyTowerLoc = "Tower Location"
+    override val towerCopyAimDir = "Antenna Aim"
+    override val towerCopyPosPrefix = "Located to the %s of your position"
+    override val towerCopyAimPrefix = "Point external antenna towards %s"
 
     // Band Lock
     override val bandLockTitle = "LTE Frequency Band Lock"

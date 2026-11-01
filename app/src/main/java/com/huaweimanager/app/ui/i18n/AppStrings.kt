@@ -99,6 +99,22 @@ interface AppStrings {
     val directionSouthEast: String
     val directionSouthWest: String
     val directionNorthWest: String
+    val sectorWord: String
+    val frequencyLabel: String
+    val bearingSouthOrSouthwest: String
+    val bearingNorthOrNorthwest: String
+    val bearingEastOrSoutheast: String
+    val bearingSouth: String
+    val sectorUnknown: String
+    fun getEstimatedTowerBearing(physicalSector: Int): String
+    fun getSectorAzimuthDescription(physicalSector: Int, lcid: Int?): String
+    fun sectorCarrierNote(lcid: Int, physicalSector: Int): String
+    fun getAntennaPointingAdvice(bearing: String, physicalSector: Int, lcidText: String): String
+    val towerCopyHeader: String
+    val towerCopyTowerLoc: String
+    val towerCopyAimDir: String
+    val towerCopyPosPrefix: String
+    val towerCopyAimPrefix: String
 
     // Band Lock
     val bandLockTitle: String

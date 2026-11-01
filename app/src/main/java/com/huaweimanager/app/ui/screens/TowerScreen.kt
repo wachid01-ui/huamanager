@@ -232,7 +232,7 @@ fun TowerScreen(
                             if (sectorId != null) {
                                 val physicalSector = signal.getPhysicalSectorNumber()
                                 Text(
-                                    text = "${S.physicalSectorLabel}: Sektor $physicalSector  •  LCID: $sectorId",
+                                    text = "${S.physicalSectorLabel}: ${S.sectorWord} $physicalSector  •  LCID: $sectorId",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = SignalGood
@@ -255,7 +255,7 @@ fun TowerScreen(
                         TowerInfoBadge(
                             label = "${S.localCellIdLabel} (LCID)",
                             value = if (sectorId != null) "$sectorId" else "-",
-                            subValue = "${S.physicalSectorLabel}: Sektor ${signal.getPhysicalSectorNumber()}",
+                            subValue = "${S.physicalSectorLabel}: ${S.sectorWord} ${signal.getPhysicalSectorNumber()}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -273,7 +273,7 @@ fun TowerScreen(
                         TowerInfoBadge(
                             label = S.signalMetricPCI,
                             value = signal.pci,
-                            subValue = "Frekuensi: ${signal.dlFrequency}",
+                            subValue = "${S.frequencyLabel}: ${signal.dlFrequency}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -339,21 +339,21 @@ fun TowerScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         SectorTile(
-                            sectorTitle = "Sektor 1",
+                            sectorTitle = "${S.sectorWord} 1",
                             degrees = "0° – 120°",
                             direction = S.directionNorth,
                             isActive = physicalSectorNum == 1,
                             modifier = Modifier.weight(1f)
                         )
                         SectorTile(
-                            sectorTitle = "Sektor 2",
+                            sectorTitle = "${S.sectorWord} 2",
                             degrees = "120° – 240°",
                             direction = S.directionEast,
                             isActive = physicalSectorNum == 2,
                             modifier = Modifier.weight(1f)
                         )
                         SectorTile(
-                            sectorTitle = "Sektor 3",
+                            sectorTitle = "${S.sectorWord} 3",
                             degrees = "240° – 360°",
                             direction = S.directionWest,
                             isActive = physicalSectorNum == 3,
@@ -363,8 +363,8 @@ fun TowerScreen(
 
                     // Helpful advice
                     Text(
-                        text = "💡 ${S.towerAdviceHeader}: " + signal.getSectorAzimuthDescription() +
-                                (if (sectorId != null && sectorId > 3) "\nℹ️ Info Sektor: Angka $sectorId adalah Local Cell ID (LCID) operator. Operator seluler memakai seri 100-an untuk membedakan frekuensi/carrier ke-3, yang secara fisik mengarah ke Sektor $physicalSectorNum." else "") +
+                        text = "💡 ${S.towerAdviceHeader}: " + signal.getSectorAzimuthDescription(S) +
+                                (if (sectorId != null && sectorId > 3) "\nℹ️ ${S.sectorCarrierNote(sectorId, physicalSectorNum)}" else "") +
                                 "\n${S.towerAdviceNote}",
                         fontSize = 11.sp,
                         color = TextMuted,
@@ -413,7 +413,7 @@ fun TowerScreen(
                                 color = TextMuted
                             )
                             Text(
-                                text = "${S.towerAdviceIntro} ${signal.getEstimatedTowerBearing()}",
+                                text = "${S.towerAdviceIntro} ${signal.getEstimatedTowerBearing(S)}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = SignalExcellent
@@ -445,7 +445,7 @@ fun TowerScreen(
                                 )
                             }
                             Text(
-                                text = "${S.towerAdvicePointing} ${signal.getEstimatedTowerBearing()} (Sektor ${signal.getPhysicalSectorNumber()}${if (sectorId != null && sectorId > 3) " / LCID $sectorId" else ""}).",
+                                text = "${S.towerAdvicePointing} ${signal.getEstimatedTowerBearing(S)} (${S.sectorWord} ${signal.getPhysicalSectorNumber()}${if (sectorId != null && sectorId > 3) " / LCID $sectorId" else ""}).",
                                 fontSize = 11.sp,
                                 color = TextPrimary,
                                 lineHeight = 16.sp
@@ -546,21 +546,21 @@ fun TowerScreen(
                     OutlinedButton(
                         onClick = {
                             val copyText = buildString {
-                                appendLine("=== DATA MENARA BTS MODEM HUAWEI ===")
-                                appendLine("Operator      : $operatorName (${signal.plmn})")
+                                appendLine(S.towerCopyHeader)
+                                appendLine("${S.signalMetricOperator.padEnd(14)}: $operatorName (${signal.plmn})")
                                 appendLine("eNodeB ID     : ${enodebId ?: "-"}")
-                                appendLine("Sector ID     : ${sectorId ?: "-"}")
+                                appendLine("${S.sectorWord} ID     : ${sectorId ?: "-"}")
                                 appendLine("Cell ID (ECI) : ${eciDec ?: signal.cellId} (${signal.getEciHex()})")
                                 appendLine("PCI           : ${signal.pci}")
-                                appendLine("Band Aktif    : Band ${signal.band} (${signal.dlFrequency})")
+                                appendLine("${S.activeBandLabel.padEnd(14)}: Band ${signal.band} (${signal.dlFrequency})")
                                 appendLine("EARFCN        : ${signal.earfcn}")
                                 appendLine("TAC           : ${signal.tac}")
                                 appendLine("RSRP          : ${signal.rsrp}")
                                 appendLine("SINR          : ${signal.sinr}")
                                 appendLine("RSRQ          : ${signal.rsrq}")
-                                appendLine("Arah Sektor   : ${signal.getSectorAzimuthDescription()}")
-                                appendLine("Letak Menara  : Di sebelah ${signal.getEstimatedTowerBearing()} posisi Anda")
-                                appendLine("Arah Pointing : Hadapkan antena luar ke ${signal.getEstimatedTowerBearing()}")
+                                appendLine("${S.sectorAntennaLabel.padEnd(14)}: ${signal.getSectorAzimuthDescription(S)}")
+                                appendLine("${S.towerCopyTowerLoc.padEnd(14)}: " + String.format(S.towerCopyPosPrefix, signal.getEstimatedTowerBearing(S)))
+                                appendLine("${S.towerCopyAimDir.padEnd(14)}: " + String.format(S.towerCopyAimPrefix, signal.getEstimatedTowerBearing(S)))
                                 appendLine("CellMapper    : ${signal.getCellMapperUrl()}")
                             }
                             clipboard.setText(AnnotatedString(copyText))
@@ -708,7 +708,7 @@ fun TowerScreen(
                                     else -> 1
                                 }
                                 Text(
-                                    text = "${S.physicalSectorLabel}: Sektor $phys  •  LCID: $lcid",
+                                    text = "${S.physicalSectorLabel}: ${S.sectorWord} $phys  •  LCID: $lcid",
                                     fontSize = 13.sp,
                                     color = SignalGood
                                 )
