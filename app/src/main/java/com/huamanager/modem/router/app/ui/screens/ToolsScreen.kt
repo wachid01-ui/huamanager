@@ -36,9 +36,11 @@ import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -94,6 +96,7 @@ fun ToolsScreen(
     val savedPassword by viewModel.savedPassword.collectAsState()
     val appTheme by viewModel.appTheme.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
+    val isProUser by viewModel.isProUser.collectAsState()
 
     var inputIp by remember(routerIp) { mutableStateOf(routerIp) }
     var inputUsername by remember(routerUsername) { mutableStateOf(routerUsername) }
@@ -112,7 +115,6 @@ fun ToolsScreen(
     ) {
         // Section: HuaManager PRO Upgrade Card
         item {
-            val isProUser by viewModel.isProUser.collectAsState()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

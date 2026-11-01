@@ -71,6 +71,7 @@ fun DashboardScreen(
     val isAutoRefresh by viewModel.isAutoRefresh.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val routerIp by viewModel.routerIp.collectAsState()
+    val isProUser by viewModel.isProUser.collectAsState()
 
     val rsrpVal = signal.parseRsrpValue()
     val sinrVal = signal.parseSinrValue()
@@ -234,7 +235,6 @@ fun DashboardScreen(
             }
         }
 
-        val isProUser by viewModel.isProUser.collectAsState()
         if (!isProUser) {
             item {
                 AdmobNativeCard()
