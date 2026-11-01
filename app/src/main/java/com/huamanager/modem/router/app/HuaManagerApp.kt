@@ -2,19 +2,17 @@ package com.huamanager.modem.router.app
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.huamanager.modem.router.app.ui.ads.AdsManager
 
 class HuaManagerApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                MobileAds.initialize(this@HuaManagerApp) {}
-            } catch (e: Exception) {
-                // ignore
+        try {
+            MobileAds.initialize(this) {
+                AdsManager.loadRewardedAd(this)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

@@ -19,10 +19,15 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,8 +57,11 @@ fun RewardedUnlockDialog(
     val context = LocalContext.current
     val S = LocalAppStrings.current
     val activity = context as? Activity
+    var isAdLoading by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = {
+        if (!isAdLoading) onDismiss()
+    }) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,51 +113,74 @@ fun RewardedUnlockDialog(
                 Button(
                     onClick = {
                         if (activity != null) {
-                            if (AdsManager.isRewardedAdReady()) {
-                                AdsManager.showRewardedAd(
-                                    activity = activity,
-                                    onRewardEarned = {
-                                        onUnlocked()
-                                        onDismiss()
-                                    },
-                                    onDismissed = {
-                                        onDismiss()
-                                    }
-                                )
-                            } else {
-                                Toast.makeText(context, S.adNotReady, Toast.LENGTH_SHORT).show()
-                                AdsManager.loadRewardedAd(context)
-                                // Gracefully unlock if ad network failed
-                                onUnlocked()
-                                onDismiss()
-                            }
+                            isAdLoading = true
+                            AdsManager.loadAndShowRewardedAd(
+                                activity = activity,
+                                onRewardEarned = {
+                                    isAdLoading = false
+                                    onUnlocked()
+                                    onDismiss()
+                                },
+                                onDismissed = {
+                                    isAdLoading = false
+                                    onDismiss()
+                                },
+                                onFailed = { errorMsg ->
+                                    isAdLoading = false
+                                    Toast.makeText(
+                                        context,
+                                        "Gagal memuat video: $errorMsg.\nPastikan HP/modem terhubung ke internet.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            )
                         } else {
                             onUnlocked()
                             onDismiss()
                         }
                     },
+                    enabled = !isAdLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = AccentPrimary,
-                        contentColor = DarkBackground
+                        contentColor = DarkBackground,
+                        disabledContainerColor = AccentPrimary.copy(alpha = 0.5f),
+                        disabledContentColor = DarkBackground.copy(alpha = 0.5f)
                     )
                 ) {
-                    Text(
-                        text = "🎬 ${S.watchVideoBtn}",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
+                    if (isAdLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = DarkBackground,
+                            strokeWidth = 2.5.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Menyiapkan Video...",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    } else {
+                        Text(
+                            text = "🎬 ${S.watchVideoBtn}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
 
                 // Button 2: Upgrade to PRO
                 Button(
                     onClick = {
-                        onDismiss()
-                        onUpgradeProClick()
+                        if (!isAdLoading) {
+                            onDismiss()
+                            onUpgradeProClick()
+                        }
                     },
+                    enabled = !isAdLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
@@ -174,13 +205,16 @@ fun RewardedUnlockDialog(
 
                 // Button 3: Cancel
                 TextButton(
-                    onClick = onDismiss,
+                    onClick = {
+                        if (!isAdLoading) onDismiss()
+                    },
+                    enabled = !isAdLoading,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = S.cancel,
+                        text = S.cancelBtn,
                         color = TextMuted,
-                        fontSize = 12.sp
+                        fontSize = 13.sp
                     )
                 }
             }
