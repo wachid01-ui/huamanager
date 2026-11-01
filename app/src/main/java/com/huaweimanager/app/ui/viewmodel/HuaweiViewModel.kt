@@ -125,7 +125,11 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
                 val savedUser = prefs.getString("router_username", "admin") ?: "admin"
 
                 if (wasLoggedIn && savedPw.isNotEmpty()) {
-                    val loginRes = apiClient.login(savedUser, savedPw)
+                    var loginRes = apiClient.login(savedUser, savedPw)
+                    if (!loginRes.isSuccess) {
+                        delay(400)
+                        loginRes = apiClient.login(savedUser, savedPw)
+                    }
                     if (loginRes.isSuccess) {
                         _isLoggedIn.value = true
                     }
@@ -207,7 +211,19 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
             val cleanUsername = username.trim()
             val cleanPassword = password.trim()
             setRouterUsername(cleanUsername)
-            val result = apiClient.login(cleanUsername, cleanPassword)
+
+            // First attempt
+            var result = apiClient.login(cleanUsername, cleanPassword)
+
+            // Orbit Star 2 / Huawei routers often require an immediate confirmation retry
+            if (!result.isSuccess) {
+                val err = result.exceptionOrNull()?.message ?: ""
+                if (!err.contains("Koneksi terputus") && !err.contains("batas percobaan")) {
+                    delay(400)
+                    result = apiClient.login(cleanUsername, cleanPassword)
+                }
+            }
+
             _isRefreshing.value = false
             if (result.isSuccess) {
                 _isLoggedIn.value = true
