@@ -96,7 +96,7 @@ fun ToolsScreen(
     val savedPassword by viewModel.savedPassword.collectAsState()
     val appTheme by viewModel.appTheme.collectAsState()
     val appLanguage by viewModel.appLanguage.collectAsState()
-    val isProUser by viewModel.isProUser.collectAsState()
+
 
     var inputIp by remember(routerIp) { mutableStateOf(routerIp) }
     var inputUsername by remember(routerUsername) { mutableStateOf(routerUsername) }
@@ -113,104 +113,6 @@ fun ToolsScreen(
         contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Section: HuaManager PRO Upgrade Card
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(if (isProUser) SignalExcellent.copy(alpha = 0.12f) else CardBackground)
-                    .border(
-                        width = if (isProUser) 1.5.dp else 1.dp,
-                        color = if (isProUser) SignalExcellent else AccentPrimary.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(18.dp)
-                    )
-                    .padding(18.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "👑", fontSize = 22.sp)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    text = S.proTitle,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = if (isProUser) SignalExcellent else TextPrimary
-                                )
-                                Text(
-                                    text = if (isProUser) "Status: Seumur Hidup" else S.proPrice,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = AccentPrimary
-                                )
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(if (isProUser) SignalExcellent.copy(alpha = 0.2f) else DarkBackground)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = if (isProUser) S.proActiveBadge else S.proFreeBadge,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isProUser) SignalExcellent else TextMuted
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = S.proSubtitle,
-                        fontSize = 11.sp,
-                        color = TextSecondary,
-                        lineHeight = 15.sp
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(text = "• ${S.proBenefit1}", fontSize = 11.sp, color = TextPrimary)
-                        Text(text = "• ${S.proBenefit2}", fontSize = 11.sp, color = TextPrimary)
-                        Text(text = "• ${S.proBenefit3}", fontSize = 11.sp, color = TextPrimary)
-                    }
-
-                    if (!isProUser) {
-                        Button(
-                            onClick = { viewModel.setProUser(true) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = AccentPrimary,
-                                contentColor = DarkBackground
-                            )
-                        ) {
-                            Icon(imageVector = Icons.Default.Star, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = S.proUpgradeBtn, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        }
-
-                        OutlinedButton(
-                            onClick = { viewModel.restorePro() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(text = S.proRestoreBtn, fontSize = 11.sp, color = TextSecondary)
-                        }
-                    }
-                }
-            }
-        }
-
         // Section: Router Connection & Login
         item {
             Text(

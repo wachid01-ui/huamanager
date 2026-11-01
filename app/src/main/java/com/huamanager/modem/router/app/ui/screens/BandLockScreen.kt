@@ -73,19 +73,15 @@ fun BandLockScreen(
 
     val individualBands = remember { LteBand.ALL_BANDS }
     val selectedBands = remember { mutableStateListOf<LteBand>() }
-    val isProUser by viewModel.isProUser.collectAsState()
+
     var showUnlockDialog by remember { mutableStateOf(false) }
     var pendingLockTitle by remember { mutableStateOf("") }
     var pendingLockAction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     val handleLock: (String, () -> Unit) -> Unit = { title, action ->
-        if (isProUser) {
-            action()
-        } else {
-            pendingLockTitle = title
-            pendingLockAction = action
-            showUnlockDialog = true
-        }
+        pendingLockTitle = title
+        pendingLockAction = action
+        showUnlockDialog = true
     }
 
     LazyColumn(
@@ -288,10 +284,8 @@ fun BandLockScreen(
             }
         }
 
-        if (!isProUser) {
-            item {
-                AdmobNativeCard()
-            }
+        item {
+            AdmobNativeCard()
         }
 
         // Section: Custom Multi-Band Selection
@@ -397,10 +391,7 @@ fun BandLockScreen(
         RewardedUnlockDialog(
             featureTitle = pendingLockTitle,
             onDismiss = { showUnlockDialog = false },
-            onUnlocked = { pendingLockAction?.invoke() },
-            onUpgradeProClick = {
-                viewModel.setProUser(true)
-            }
+            onUnlocked = { pendingLockAction?.invoke() }
         )
     }
 }

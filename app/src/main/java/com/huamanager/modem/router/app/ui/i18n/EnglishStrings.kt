@@ -261,7 +261,7 @@ object EnglishStrings : AppStrings {
     override val proBenefit2 = "Instant Band Locking without watching videos"
     override val proBenefit3 = "Unlimited Antenna Pointing & BTS Guidance"
     override val rewardUnlockTitle = "Unlock Feature"
-    override val rewardUnlockDesc = "Watch 1 quick video to apply this action to your modem, or upgrade to PRO for instant ad-free access forever."
+    override val rewardUnlockDesc = "Watch 1 quick video to apply this action to your modem."
     override val watchVideoBtn = "Watch Video Ad (Free)"
     override val adNotReady = "Ad is loading, please try again in a moment."
 }

@@ -83,14 +83,11 @@ fun MainAppScreen(viewModel: HuaViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
     val toastMessage by viewModel.toastMessage.collectAsState()
-    val isProUser by viewModel.isProUser.collectAsState()
     val S = LocalAppStrings.current
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        if (!isProUser) {
-            AdsManager.loadRewardedAd(context)
-        }
+        AdsManager.loadRewardedAd(context)
     }
 
     val navItems = listOf(
@@ -114,9 +111,7 @@ fun MainAppScreen(viewModel: HuaViewModel) {
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             Column {
-                if (!isProUser) {
-                    AdmobBanner(modifier = Modifier.fillMaxWidth())
-                }
+                AdmobBanner(modifier = Modifier.fillMaxWidth())
                 NavigationBar(
                     containerColor = CardBackground,
                     tonalElevation = 8.dp

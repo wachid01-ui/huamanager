@@ -261,7 +261,7 @@ object IndonesianStrings : AppStrings {
     override val proBenefit2 = "Kunci Band instan tanpa perlu nonton video"
     override val proBenefit3 = "Panduan Pointing Antena & Sektor tanpa batas"
     override val rewardUnlockTitle = "Buka Akses Fitur"
-    override val rewardUnlockDesc = "Tonton 1 video singkat untuk menerapkan perintah ini ke modem Anda, atau upgrade ke PRO untuk akses instan tanpa iklan selamanya."
+    override val rewardUnlockDesc = "Tonton 1 video singkat untuk menerapkan perintah ini ke modem Anda."
     override val watchVideoBtn = "Tonton Video Gratis"
     override val adNotReady = "Iklan sedang dimuat, silakan coba beberapa detik lagi."
 }

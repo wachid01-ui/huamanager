@@ -71,7 +71,6 @@ fun DashboardScreen(
     val isAutoRefresh by viewModel.isAutoRefresh.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val routerIp by viewModel.routerIp.collectAsState()
-    val isProUser by viewModel.isProUser.collectAsState()
 
     val rsrpVal = signal.parseRsrpValue()
     val sinrVal = signal.parseSinrValue()
@@ -235,10 +234,8 @@ fun DashboardScreen(
             }
         }
 
-        if (!isProUser) {
-            item {
-                AdmobNativeCard()
-            }
+        item {
+            AdmobNativeCard()
         }
 
         // 3. Signal Parameters Grid (RSRP, SINR, RSRQ, RSSI)

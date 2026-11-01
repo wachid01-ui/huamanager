@@ -84,7 +84,6 @@ fun TowerScreen(
     modifier: Modifier = Modifier
 ) {
     val S = LocalAppStrings.current
-    val isProUser by viewModel.isProUser.collectAsState()
     val signal by viewModel.signalInfo.collectAsState()
     val netStatus by viewModel.networkStatus.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
@@ -458,10 +457,8 @@ fun TowerScreen(
             }
         }
 
-        if (!isProUser) {
-            item {
-                AdmobNativeCard()
-            }
+        item {
+            AdmobNativeCard()
         }
 
         // Section: Map Links & Action Tools

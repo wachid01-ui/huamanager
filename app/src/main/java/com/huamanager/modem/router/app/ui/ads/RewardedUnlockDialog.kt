@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,7 +41,6 @@ import com.huamanager.modem.router.app.ui.theme.AccentPrimary
 import com.huamanager.modem.router.app.ui.theme.CardBackground
 import com.huamanager.modem.router.app.ui.theme.CardBorder
 import com.huamanager.modem.router.app.ui.theme.DarkBackground
-import com.huamanager.modem.router.app.ui.theme.SignalExcellent
 import com.huamanager.modem.router.app.ui.theme.TextMuted
 import com.huamanager.modem.router.app.ui.theme.TextPrimary
 import com.huamanager.modem.router.app.ui.theme.TextSecondary
@@ -51,8 +49,7 @@ import com.huamanager.modem.router.app.ui.theme.TextSecondary
 fun RewardedUnlockDialog(
     featureTitle: String,
     onDismiss: () -> Unit,
-    onUnlocked: () -> Unit,
-    onUpgradeProClick: () -> Unit
+    onUnlocked: () -> Unit
 ) {
     val context = LocalContext.current
     val S = LocalAppStrings.current
@@ -172,38 +169,7 @@ fun RewardedUnlockDialog(
                     }
                 }
 
-                // Button 2: Upgrade to PRO
-                Button(
-                    onClick = {
-                        if (!isAdLoading) {
-                            onDismiss()
-                            onUpgradeProClick()
-                        }
-                    },
-                    enabled = !isAdLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SignalExcellent.copy(alpha = 0.2f),
-                        contentColor = SignalExcellent
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = S.proUpgradeBtn,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                }
-
-                // Button 3: Cancel
+                // Button 2: Cancel
                 TextButton(
                     onClick = {
                         if (!isAdLoading) onDismiss()
