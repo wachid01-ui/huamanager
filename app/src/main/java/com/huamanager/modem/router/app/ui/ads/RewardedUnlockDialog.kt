@@ -57,7 +57,8 @@ fun RewardedUnlockDialog(
     var isAdLoading by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = {
-        if (!isAdLoading) onDismiss()
+        isAdLoading = false
+        onDismiss()
     }) {
         Box(
             modifier = Modifier
@@ -172,9 +173,9 @@ fun RewardedUnlockDialog(
                 // Button 2: Cancel
                 TextButton(
                     onClick = {
-                        if (!isAdLoading) onDismiss()
+                        isAdLoading = false
+                        onDismiss()
                     },
-                    enabled = !isAdLoading,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(

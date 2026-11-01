@@ -2,6 +2,8 @@ package com.huamanager.modem.router.app.ui.ads
 
 import android.app.Activity
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -21,6 +23,9 @@ object AdsManager {
     private var rewardedAd: RewardedAd? = null
     private var isAdLoading = false
 
+    private val pendingLoadedCallbacks = mutableListOf<() -> Unit>()
+    private val pendingFailedCallbacks = mutableListOf<(String) -> Unit>()
+
     fun loadRewardedAd(
         context: Context,
         onLoaded: (() -> Unit)? = null,
@@ -30,13 +35,20 @@ object AdsManager {
             onLoaded?.invoke()
             return
         }
-        if (isAdLoading) return
+
+        if (onLoaded != null) pendingLoadedCallbacks.add(onLoaded)
+        if (onFailed != null) pendingFailedCallbacks.add(onFailed)
+
+        if (isAdLoading) {
+            Log.d(TAG, "RewardedAd is already loading in background, queued listener.")
+            return
+        }
 
         isAdLoading = true
         Log.d(TAG, "Requesting new RewardedAd from Google AdMob...")
         val adRequest = AdRequest.Builder().build()
         RewardedAd.load(
-            context,
+            context.applicationContext,
             REWARDED_AD_UNIT_ID,
             adRequest,
             object : RewardedAdLoadCallback() {
@@ -44,7 +56,10 @@ object AdsManager {
                     rewardedAd = ad
                     isAdLoading = false
                     Log.d(TAG, "RewardedAd successfully loaded and ready to display")
-                    onLoaded?.invoke()
+                    val loaded = ArrayList(pendingLoadedCallbacks)
+                    pendingLoadedCallbacks.clear()
+                    pendingFailedCallbacks.clear()
+                    loaded.forEach { it.invoke() }
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -52,7 +67,10 @@ object AdsManager {
                     isAdLoading = false
                     val errorMsg = "${error.message} (code: ${error.code})"
                     Log.e(TAG, "Failed to load RewardedAd: $errorMsg")
-                    onFailed?.invoke(errorMsg)
+                    val failed = ArrayList(pendingFailedCallbacks)
+                    pendingLoadedCallbacks.clear()
+                    pendingFailedCallbacks.clear()
+                    failed.forEach { it.invoke(errorMsg) }
                 }
             }
         )
@@ -78,8 +96,8 @@ object AdsManager {
                 override fun onAdDismissedFullScreenContent() {
                     Log.d(TAG, "RewardedAd closed by user")
                     rewardedAd = null
-                    // Preload next ad for future use
-                    loadRewardedAd(activity)
+                    // Immediately preload the next ad in background so subsequent requests are instant
+                    loadRewardedAd(activity.applicationContext)
 
                     if (earnedReward) {
                         onRewardEarned()
@@ -90,7 +108,7 @@ object AdsManager {
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     Log.e(TAG, "RewardedAd failed to show: ${adError.message}")
                     rewardedAd = null
-                    loadRewardedAd(activity)
+                    loadRewardedAd(activity.applicationContext)
                     onFailed?.invoke(adError.message)
                 }
             }
@@ -117,21 +135,41 @@ object AdsManager {
                 onDismissed = onDismissed,
                 onFailed = onFailed
             )
-        } else {
-            loadRewardedAd(
-                context = activity,
-                onLoaded = {
+            return
+        }
+
+        var isCompleted = false
+        val timeoutHandler = Handler(Looper.getMainLooper())
+        val timeoutRunnable = Runnable {
+            if (!isCompleted) {
+                isCompleted = true
+                Log.w(TAG, "loadAndShowRewardedAd timed out after 12s")
+                onFailed?.invoke("Waktu memuat video habis (koneksi lambat). Silakan periksa koneksi internet.")
+            }
+        }
+        timeoutHandler.postDelayed(timeoutRunnable, 12000L)
+
+        loadRewardedAd(
+            context = activity,
+            onLoaded = {
+                timeoutHandler.removeCallbacks(timeoutRunnable)
+                if (!isCompleted && !activity.isFinishing && !activity.isDestroyed) {
+                    isCompleted = true
                     showRewardedAd(
                         activity = activity,
                         onRewardEarned = onRewardEarned,
                         onDismissed = onDismissed,
                         onFailed = onFailed
                     )
-                },
-                onFailed = { errorMsg ->
+                }
+            },
+            onFailed = { errorMsg ->
+                timeoutHandler.removeCallbacks(timeoutRunnable)
+                if (!isCompleted) {
+                    isCompleted = true
                     onFailed?.invoke(errorMsg)
                 }
-            )
-        }
+            }
+        )
     }
 }
