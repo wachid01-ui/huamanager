@@ -1,0 +1,251 @@
+package com.huamanager.modem.router.app.ui.i18n
+
+object EnglishStrings : AppStrings {
+    // Navigation items
+    override val navSignal = "Signal"
+    override val navTower = "Tower"
+    override val navBandLock = "Band Lock"
+    override val navSms = "SMS"
+    override val navTools = "Tools"
+
+    // General & Status
+    override val connected = "Connected"
+    override val disconnected = "Disconnected"
+    override val autoRefreshActive = "Auto-refresh: 2.5s"
+    override val autoRefreshPaused = "Auto-refresh: Paused"
+    override val processing = "Processing..."
+    override val success = "Success"
+    override val failed = "Failed"
+    override val save = "Save"
+    override val close = "Close"
+    override val cancel = "Cancel"
+    override val confirm = "Yes, Proceed"
+    override val refresh = "Refresh"
+    override val copy = "Copy"
+    override val copied = "Copied to clipboard"
+
+    // Signal Quality Labels
+    override val qualityExcellent = "EXCELLENT"
+    override val qualityGood = "GOOD"
+    override val qualityFair = "FAIR"
+    override val qualityPoor = "WEAK / POOR"
+    override val qualitySearching = "SEARCHING..."
+
+    // Signal Metrics Labels & Descriptions
+    override val noiseGood = "Good"
+    override val noiseFair = "Fair"
+    override val noisePoor = "High Noise"
+    override val signalGood = "Good"
+    override val signalFair = "Fair"
+    override val signalPoor = "Weak"
+
+    // Dashboard
+    override val realtimeSignalParams = "Real-time Signal Parameters"
+    override val notConnectedMsg = "Not connected to modem"
+    override val signalMetricRSRP = "RSRP (Signal Strength)"
+    override val signalMetricSINR = "SINR (Noise Ratio)"
+    override val signalMetricRSRQ = "RSRQ (Signal Quality)"
+    override val signalMetricRSSI = "RSSI (Received Power)"
+    override val signalMetricPCI = "PCI (Physical Cell ID)"
+    override val signalMetricCellId = "Cell ID (eNodeB)"
+    override val signalMetricBand = "Frequency Band (LTE)"
+    override val signalMetricFreq = "DL / UL Frequency"
+    override val signalMetricDlUlFreq = "DL/UL Frequency"
+    override val signalMetricBandwidth = "Bandwidth"
+    override val signalMetricNetworkType = "Network Type"
+    override val signalMetricOperator = "Carrier Network"
+    override val signalMetricRoaming = "Roaming Status"
+    override val roamingActive = "Active (Roaming)"
+    override val roamingInactive = "Disabled"
+
+    // Tower & Antenna
+    override val towerInfoTitle = "Cell ID & BTS Tower Information"
+    override val towerSubtitle = "Automatic detection of eNodeB tower ID, antenna azimuth, and antenna alignment"
+    override val enodebSectorTitle = "eNodeB ID & Antenna Sector"
+    override val enodebIdLabel = "eNodeB ID (BTS Tower ID)"
+    override val sectorAntennaLabel = "Antenna Sector"
+    override val physicalSectorLabel = "Physical Sector"
+    override val localCellIdLabel = "Local Cell ID (LCID)"
+    override val physicalSectorDesc = "Standard eNodeB calculation: Cell ID / 256"
+    override val antennaAzimuthTitle = "Transmitter Antenna Azimuth"
+    override val antennaAzimuthSubtitle = "Estimated carrier beam radiation direction from cellular tower"
+    override val estimatedTowerDirTitle = "Estimated BTS Tower Direction"
+    override val estimatedTowerDirSubtitle = "Guidance on BTS tower position relative to your house & antenna pointing"
+    override val towerAdviceHeader = "TOWER LOCATION & ANTENNA GUIDANCE"
+    override val towerAdviceIntro = "The BTS tower is located to the"
+    override val towerAdvicePointing = "Point your outdoor/modem antenna towards"
+    override val towerAdviceNote = "Use your smartphone compass to aim your directional antenna for maximum RSRP signal and highest SINR."
+    override val openCellMapperBtn = "Open Location on CellMapper.net"
+    override val manualCellIdCalcTitle = "Manual Cell ID Calculator"
+    override val manualCellIdCalcSubtitle = "Calculate eNodeB ID and sector from any carrier's Cell ID"
+    override val manualCellIdInputLabel = "Enter Cell ID (e.g., 27402347)"
+    override val calculateBtn = "Calculate"
+    override val calcResultTitle = "Calculation Result:"
+    override val calcResultEnodeB = "eNodeB ID:"
+    override val calcResultSector = "Sector:"
+    override val calcResultAzimuth = "Antenna Beam:"
+    override val calcResultTowerDir = "Tower Direction:"
+    override val invalidCellIdError = "Cell ID must be a positive integer"
+    override val directionNorth = "North (0° - 120°)"
+    override val directionEast = "East / Southeast (120° - 240°)"
+    override val directionSouth = "South (180°)"
+    override val directionWest = "West / Southwest (240° - 360°)"
+    override val directionNorthEast = "Northeast"
+    override val directionSouthEast = "Southeast"
+    override val directionSouthWest = "Southwest"
+    override val directionNorthWest = "Northwest"
+    override val sectorWord = "Sector"
+    override val frequencyLabel = "Frequency"
+    override val bearingSouthOrSouthwest = "SOUTH (or Southwest)"
+    override val bearingNorthOrNorthwest = "NORTH (or Northwest)"
+    override val bearingEastOrSoutheast = "EAST (or Southeast)"
+    override val bearingSouth = "SOUTH"
+    override val sectorUnknown = "Unknown Sector"
+
+    override fun getEstimatedTowerBearing(physicalSector: Int): String {
+        return when (physicalSector) {
+            1 -> bearingSouthOrSouthwest
+            2 -> bearingNorthOrNorthwest
+            3 -> bearingEastOrSoutheast
+            else -> bearingSouth
+        }
+    }
+
+    override fun getSectorAzimuthDescription(physicalSector: Int, lcid: Int?): String {
+        val lcidStr = if (lcid != null) " (LCID $lcid)" else ""
+        return when (physicalSector) {
+            1 -> "Physical Sector 1$lcidStr: Facing ~0° - 120° (North – Northeast)"
+            2 -> "Physical Sector 2$lcidStr: Facing ~120° - 240° (Southeast – South)"
+            3 -> "Physical Sector 3$lcidStr: Facing ~240° - 360° (Northwest – West)"
+            else -> "Physical Sector $physicalSector$lcidStr"
+        }
+    }
+
+    override fun sectorCarrierNote(lcid: Int, physicalSector: Int): String =
+        "Sector Info: Number $lcid is the mobile operator's Local Cell ID (LCID). Operators use the 100-series to differentiate the 3rd carrier frequency, which physically points towards Sector $physicalSector."
+
+    override fun getAntennaPointingAdvice(bearing: String, physicalSector: Int, lcidText: String): String =
+        "The BTS tower is estimated to be located to the $bearing of your position (transmitter antenna Sector $physicalSector$lcidText beams toward your location). Aim your external antenna (Yagi/LPDA) towards $bearing."
+
+    override val towerCopyHeader = "=== HUAWEI MODEM BTS CELL TOWER DATA ==="
+    override val towerCopyTowerLoc = "Tower Location"
+    override val towerCopyAimDir = "Antenna Aim"
+    override val towerCopyPosPrefix = "Located to the %s of your position"
+    override val towerCopyAimPrefix = "Point external antenna towards %s"
+
+    // Band Lock
+    override val bandLockTitle = "LTE Frequency Band Lock"
+    override val bandLockSubtitle = "Select one or more 4G LTE frequency bands to lock your modem's connection"
+    override val activeBandLabel = "Currently Active LTE Band:"
+    override val selectBandsToLock = "Select LTE Frequencies to Lock:"
+    override val lockSelectedBandsBtn = "Lock to Selected Bands"
+    override val resetAllBandsBtn = "Reset (Auto / All Bands)"
+    override val bandLockAuthRequired = "Band locking requires authentication. Go to 'Tools' tab to enter admin password and log in first."
+    override val bandLockSuccessMsg = "Successfully locked to"
+    override val bandLockFailedMsg = "Failed to lock band"
+    override val selectAtLeastOneBand = "Please select at least 1 frequency band"
+    override val presetBandsTitle = "Quick Presets (Recommended)"
+    override val presetBand3Title = "Band 3 (1800 MHz) - Fastest & Popular"
+    override val presetBand3Subtitle = "Telkomsel, Indosat, XL, Tri • Most stable for gaming & streaming"
+    override val presetBand40Title = "Band 40 (2300 MHz TDD) - Orbit / Smartfren"
+    override val presetBand40Subtitle = "Best suited for Telkomsel Orbit & Smartfren Unlimited"
+    override val presetBand1Title = "Band 1 (2100 MHz)"
+    override val presetBand1Subtitle = "Telkomsel, Indosat, XL • Alternative when Band 3 is congested"
+    override val presetBand8Title = "Band 8 (900 MHz) - Longest Range"
+    override val presetBand8Subtitle = "Best wall penetration / rural & suburban areas"
+    override val presetAutoTitle = "Auto Mode (All Bands)"
+    override val presetAutoSubtitle = "Let modem select bands automatically (factory default)"
+    override val carrierAggregationTitle = "Carrier Aggregation (4G+ Combinations)"
+    override val manualBandSelectionTitle = "Manual / Custom Band Selection"
+    override val lockBtn = "Lock"
+    override val customCombinationLabel = "Custom Combination"
+    override val badgeRecommended = "RECOMMENDED"
+    override val badgeDefault = "DEFAULT"
+    override val badgeCoverage = "COVERAGE"
+
+    override fun getBandFrequency(bandNumber: Int, defaultFreq: String): String {
+        return if (bandNumber == 0) "All LTE Bands" else defaultFreq
+    }
+
+    override fun getBandDescription(bandNumber: Int, defaultDesc: String): String {
+        return when (bandNumber) {
+            0 -> "Automatic / default mode"
+            3 -> "Fastest & most popular band in Indonesia"
+            8 -> "Wide coverage (Telkomsel, Indosat, XL)"
+            20 -> "Rural long range"
+            else -> defaultDesc
+        }
+    }
+
+    // SMS
+    override val smsTitle = "Modem SIM Card SMS"
+    override val smsSubtitle = "Read and manage text messages stored on the modem's SIM card"
+    override val sendSmsCardTitle = "Send New SMS"
+    override val sendSmsCardSubtitle = "Send SMS directly through your modem's cellular connection"
+    override val recipientPhoneLabel = "Recipient Phone Number (e.g., +628123456789)"
+    override val messageContentLabel = "Write your message here..."
+    override val sendSmsBtn = "Send SMS"
+    override val sendingSms = "Sending..."
+    override val smsSentSuccess = "SMS sent successfully"
+    override val smsSentFailed = "Failed to send SMS"
+    override val inboxTitle = "SIM Inbox"
+    override val inboxSubtitle = "Messages stored in SIM card memory"
+    override val noSmsMessages = "No SMS messages found in inbox"
+    override val deleteSmsBtn = "Delete"
+    override val deleteSmsSuccess = "SMS deleted successfully"
+    override val deleteSmsFailed = "Failed to delete SMS"
+
+    // Tools & Settings
+    override val connectionAuthTitle = "Modem Connection & Authentication"
+    override val gatewayIpLabel = "Modem Gateway IP (Default: 192.168.8.1)"
+    override val usernameLabel = "WebUI Admin Username (Default: admin)"
+    override val passwordLabel = "Modem WebUI Admin Password"
+    override val showPasswordDesc = "Show password"
+    override val hidePasswordDesc = "Hide password"
+    override val statusLoggedIn = "Status: Logged In"
+    override val statusNotLoggedIn = "Status: Not Logged In"
+    override val loginBtn = "Login"
+    override val logoutBtn = "Logout"
+    override val reloginBtn = "Re-login"
+    override val loginSuccess = "Login successful!"
+    override val logoutSuccess = "Successfully logged out from modem"
+    override val loginFailed = "Login failed"
+    override val tipsTitle = "Modem Login Instructions & Tips"
+    override val tip1 = "1. Ensure your Android device is connected to the Huawei modem's Wi-Fi network (not mobile data)."
+    override val tip2 = "2. The admin password is usually printed on the sticker beneath the router or created during initial setup."
+    override val tip3 = "3. Use the eye icon button to verify character casing (uppercase/lowercase) and avoid typos."
+    override val tip4 = "4. The app automatically persists your login session so you stay logged in until you tap Logout."
+    override val tip5 = "5. Once logged in, you can lock LTE bands, read/send SMS, and reboot the router."
+    override val modemControlsTitle = "Modem Controls"
+    override val rebootBtn = "Reboot Modem"
+    override val mobileDataBtn = "Mobile Data"
+    override val mobileDataOn = "Mobile data enabled"
+    override val mobileDataOff = "Mobile data disabled"
+    override val rebootConfirmTitle = "Confirm Modem Reboot"
+    override val rebootConfirmMsg = "Are you sure you want to restart your Huawei modem now? Internet connection will be interrupted during the reboot process (approx. 1-2 minutes)."
+    override val rebootProgressMsg = "Modem is rebooting..."
+    override val rebootFailedMsg = "Reboot failed"
+    override val ussdTitle = "Carrier USSD Codes"
+    override val ussdCodeLabel = "USSD Code (e.g., *888# or *100#)"
+    override val ussdCallBtn = "Send"
+    override val ussdCalling = "Contacting carrier network..."
+    override val ussdResultTitle = "USSD Response:"
+    override val deviceInfoTitle = "Device Information"
+    override val deviceInfoModel = "Modem Model"
+    override val deviceInfoFirmware = "Firmware Version"
+    override val deviceInfoWebUi = "WebUI Version"
+    override val deviceInfoHardware = "Hardware Version"
+    override val deviceInfoImei = "IMEI"
+    override val deviceInfoImsi = "IMSI"
+    override val deviceInfoMac = "MAC Address"
+
+    // Theme & Appearance
+    override val themeSectionTitle = "App Theme & Appearance"
+    override val themeSectionSubtitle = "Choose the display style & color palette that suits you best"
+    override val activeThemePrefix = "Active theme:"
+
+    // Language Section
+    override val languageSectionTitle = "App Language / Bahasa Aplikasi"
+    override val languageSectionSubtitle = "Select your preferred user interface language"
+    override val activeLanguagePrefix = "Active language:"
+}

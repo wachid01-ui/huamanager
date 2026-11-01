@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.huaweimanager.app"
+    namespace = "com.huamanager.modem.router.app"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.huaweimanager.app"
+        applicationId = "com.huamanager.modem.router.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
