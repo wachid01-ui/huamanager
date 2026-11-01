@@ -202,14 +202,10 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
 
     fun login(password: String, username: String = _routerUsername.value, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            // Temporarily pause auto-refresh polling so it doesn't race with the login handshake
-            pollingJob?.cancel()
-            pollingJob = null
-
             _isRefreshing.value = true
             _loginError.value = null
             val cleanUsername = username.trim()
-            val cleanPassword = apiClient.cleanSecret(password)
+            val cleanPassword = password.trim()
             setRouterUsername(cleanUsername)
             val result = apiClient.login(cleanUsername, cleanPassword)
             _isRefreshing.value = false
@@ -225,18 +221,12 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
                 _toastMessage.value = "Login berhasil!"
                 loadDeviceInfo()
                 refreshSignalAndStatus()
-                if (_isAutoRefresh.value) {
-                    startAutoRefresh()
-                }
                 onResult(true)
             } else {
                 _isLoggedIn.value = false
                 val err = result.exceptionOrNull()?.message ?: "Login gagal"
                 _loginError.value = err
                 _toastMessage.value = err
-                if (_isAutoRefresh.value) {
-                    startAutoRefresh()
-                }
                 onResult(false)
             }
         }
