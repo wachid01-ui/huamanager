@@ -196,7 +196,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
         val cleanPassword = cleanSecret(password)
 
         if (cleanPassword.isEmpty()) {
-            return@withContext Result.failure(Exception("Password tidak boleh kosong"))
+            return@withContext Result.failure<Boolean>(Exception("Password tidak boleh kosong"))
         }
 
         var lastError: Exception? = null
@@ -221,7 +221,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             }
         }
 
-        Result.failure(lastError ?: Exception("Login gagal"))
+        return@withContext Result.failure<Boolean>(lastError ?: Exception("Login gagal"))
     }
 
     private suspend fun executeLoginHandshake(cleanUsername: String, cleanPassword: String): Result<Boolean> {
@@ -230,7 +230,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             clearSession()
             val tokenReady = refreshTokens()
             if (!tokenReady) {
-                return Result.failure(Exception("Gagal mengambil token sesi modem. Pastikan HP terhubung ke WiFi router."))
+                return Result.failure<Boolean>(Exception("Gagal mengambil token sesi modem. Pastikan HP terhubung ke WiFi router."))
             }
 
             // Step 1: Try modern SCRAM challenge_login first (B311, B312, B535, Orbit Star, SoyeaLink)
@@ -331,7 +331,7 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
                         }
 
                         val errMsg = parseHuaweiErrorMessage(authBody, "Password admin modem salah.")
-                        return Result.failure(Exception(errMsg))
+                        return Result.failure<Boolean>(Exception(errMsg))
                     }
                 }
             }
@@ -394,10 +394,10 @@ class HiLinkApiClient(var baseUrl: String = "http://192.168.8.1") {
             }
 
             val friendlyMsg = parseHuaweiErrorMessage(loginBody, "Login gagal.")
-            Result.failure(Exception(friendlyMsg))
+            return Result.failure<Boolean>(Exception(friendlyMsg))
         } catch (e: Exception) {
             val netError = e.message ?: "Koneksi terputus"
-            Result.failure(Exception("Gagal menghubungi modem ($netError). Pastikan HP terhubung ke WiFi router."))
+            return Result.failure<Boolean>(Exception("Gagal menghubungi modem ($netError). Pastikan HP terhubung ke WiFi router."))
         }
     }
 
