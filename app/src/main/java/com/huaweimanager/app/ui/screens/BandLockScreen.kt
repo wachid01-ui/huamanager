@@ -153,7 +153,7 @@ fun BandLockScreen(
         // Section: Preset Terpopuler di Indonesia
         item {
             Text(
-                text = "Preset Cepat (Rekomendasi Indonesia)",
+                text = S.presetBandsTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -164,50 +164,55 @@ fun BandLockScreen(
         // Preset 1: Band 3 (1800 MHz - Tercepat)
         item {
             PresetBandItem(
-                title = "Band 3 (1800 MHz) - Tercepat & Populer",
-                subtitle = "Telkomsel, Indosat, XL, Tri • Paling stabil untuk gaming & streaming",
-                badge = "RECOMMENDED",
-                onClick = { viewModel.lockBand("4", "Band 3 (1800 MHz)") }
+                title = S.presetBand3Title,
+                subtitle = S.presetBand3Subtitle,
+                badge = S.badgeRecommended,
+                lockBtnText = S.lockBtn,
+                onClick = { viewModel.lockBand("4", "Band 3 (1800 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
             )
         }
 
         // Preset 2: Band 40 (2300 MHz - Telkomsel Orbit & Smartfren)
         item {
             PresetBandItem(
-                title = "Band 40 (2300 MHz TDD) - Orbit / Smartfren",
-                subtitle = "Sangat cocok untuk pengguna Telkomsel Orbit & Smartfren Unlimited",
+                title = S.presetBand40Title,
+                subtitle = S.presetBand40Subtitle,
                 badge = "ORBIT",
-                onClick = { viewModel.lockBand("8000000000", "Band 40 (2300 MHz)") }
+                lockBtnText = S.lockBtn,
+                onClick = { viewModel.lockBand("8000000000", "Band 40 (2300 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
             )
         }
 
         // Preset 3: Band 1 (2100 MHz)
         item {
             PresetBandItem(
-                title = "Band 1 (2100 MHz)",
-                subtitle = "Telkomsel, Indosat, XL • Alternatif jika Band 3 padat",
+                title = S.presetBand1Title,
+                subtitle = S.presetBand1Subtitle,
                 badge = null,
-                onClick = { viewModel.lockBand("1", "Band 1 (2100 MHz)") }
+                lockBtnText = S.lockBtn,
+                onClick = { viewModel.lockBand("1", "Band 1 (2100 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
             )
         }
 
         // Preset 4: Band 8 (900 MHz - Sinyal Kuat)
         item {
             PresetBandItem(
-                title = "Band 8 (900 MHz) - Jangkauan Terjauh",
-                subtitle = "Sinyal paling tembus tembok / lokasi pinggiran kota",
-                badge = "COVERAGE",
-                onClick = { viewModel.lockBand("80000000", "Band 8 (900 MHz)") }
+                title = S.presetBand8Title,
+                subtitle = S.presetBand8Subtitle,
+                badge = S.badgeCoverage,
+                lockBtnText = S.lockBtn,
+                onClick = { viewModel.lockBand("80000000", "Band 8 (900 MHz)", S.bandLockSuccessMsg, S.bandLockFailedMsg) }
             )
         }
 
         // Preset 5: Auto (Reset semua band)
         item {
             PresetBandItem(
-                title = "Mode Auto (Semua Band)",
-                subtitle = "Biarkan modem memilih band secara otomatis seperti bawaan pabrik",
-                badge = "DEFAULT",
-                onClick = { viewModel.lockBand("7FFFFFFFFFFFFFFF", "Mode Auto (Semua Band)") }
+                title = S.presetAutoTitle,
+                subtitle = S.presetAutoSubtitle,
+                badge = S.badgeDefault,
+                lockBtnText = S.lockBtn,
+                onClick = { viewModel.lockBand("7FFFFFFFFFFFFFFF", S.presetAutoTitle, S.bandLockSuccessMsg, S.bandLockFailedMsg) }
             )
         }
 
@@ -215,7 +220,7 @@ fun BandLockScreen(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Carrier Aggregation (Kombinasi 4G+)",
+                text = S.carrierAggregationTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -232,7 +237,7 @@ fun BandLockScreen(
                             .clip(RoundedCornerShape(14.dp))
                             .background(CardBackground)
                             .border(1.dp, CardBorder, RoundedCornerShape(14.dp))
-                            .clickable { viewModel.lockBand(hex, name) }
+                            .clickable { viewModel.lockBand(hex, name, S.bandLockSuccessMsg, S.bandLockFailedMsg) }
                             .padding(14.dp)
                     ) {
                         Row(
@@ -256,7 +261,7 @@ fun BandLockScreen(
                                 )
                             }
                             Text(
-                                text = "Kunci",
+                                text = S.lockBtn,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = AccentPrimary
@@ -271,7 +276,7 @@ fun BandLockScreen(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Pilih Band Manual / Custom",
+                text = S.manualBandSelectionTitle,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TextSecondary,
@@ -303,14 +308,15 @@ fun BandLockScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "${band.name} - ${band.frequency}",
+                            text = "${band.name} - ${S.getBandFrequency(band.bandNumber, band.frequency)}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = TextPrimary
                         )
-                        if (band.description.isNotEmpty()) {
+                        val desc = S.getBandDescription(band.bandNumber, band.description)
+                        if (desc.isNotEmpty()) {
                             Text(
-                                text = band.description,
+                                text = desc,
                                 fontSize = 11.sp,
                                 color = TextMuted
                             )
@@ -336,7 +342,7 @@ fun BandLockScreen(
             Button(
                 onClick = {
                     val hex = LteBand.calculateCombinedHex(selectedBands)
-                    viewModel.lockBand(hex, "Kombinasi Kustom ($hex)")
+                    viewModel.lockBand(hex, "${S.customCombinationLabel} ($hex)", S.bandLockSuccessMsg, S.bandLockFailedMsg)
                 },
                 enabled = selectedBands.isNotEmpty() && !isRefreshing,
                 modifier = Modifier
@@ -369,6 +375,7 @@ private fun PresetBandItem(
     title: String,
     subtitle: String,
     badge: String?,
+    lockBtnText: String,
     onClick: () -> Unit
 ) {
     Box(
@@ -430,7 +437,7 @@ private fun PresetBandItem(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "Kunci",
+                    text = lockBtnText,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )

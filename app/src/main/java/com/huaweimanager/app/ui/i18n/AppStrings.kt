@@ -127,6 +127,26 @@ interface AppStrings {
     val bandLockSuccessMsg: String
     val bandLockFailedMsg: String
     val selectAtLeastOneBand: String
+    val presetBandsTitle: String
+    val presetBand3Title: String
+    val presetBand3Subtitle: String
+    val presetBand40Title: String
+    val presetBand40Subtitle: String
+    val presetBand1Title: String
+    val presetBand1Subtitle: String
+    val presetBand8Title: String
+    val presetBand8Subtitle: String
+    val presetAutoTitle: String
+    val presetAutoSubtitle: String
+    val carrierAggregationTitle: String
+    val manualBandSelectionTitle: String
+    val lockBtn: String
+    val customCombinationLabel: String
+    val badgeRecommended: String
+    val badgeDefault: String
+    val badgeCoverage: String
+    fun getBandFrequency(bandNumber: Int, defaultFreq: String): String
+    fun getBandDescription(bandNumber: Int, defaultDesc: String): String
 
     // SMS
     val smsTitle: String

@@ -263,17 +263,23 @@ class HuaweiViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun lockBand(hexMask: String, bandName: String) {
+    fun lockBand(
+        hexMask: String,
+        bandName: String,
+        successPrefix: String? = null,
+        failureMsg: String? = null
+    ) {
         viewModelScope.launch {
             _isRefreshing.value = true
             val res = apiClient.setLteBand(hexMask, networkMode = if (hexMask == "7FFFFFFFFFFFFFFF") "00" else "03")
             _isRefreshing.value = false
             if (res.isSuccess) {
-                _toastMessage.value = "Berhasil mengunci ke $bandName"
+                val prefix = successPrefix ?: "Berhasil mengunci ke"
+                _toastMessage.value = "$prefix $bandName"
                 delay(1500)
                 refreshSignalAndStatus()
             } else {
-                _toastMessage.value = res.exceptionOrNull()?.message ?: "Gagal mengunci band"
+                _toastMessage.value = failureMsg ?: res.exceptionOrNull()?.message ?: "Gagal mengunci band"
             }
         }
     }

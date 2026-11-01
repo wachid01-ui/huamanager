@@ -144,6 +144,38 @@ object EnglishStrings : AppStrings {
     override val bandLockSuccessMsg = "Successfully locked to"
     override val bandLockFailedMsg = "Failed to lock band"
     override val selectAtLeastOneBand = "Please select at least 1 frequency band"
+    override val presetBandsTitle = "Quick Presets (Recommended)"
+    override val presetBand3Title = "Band 3 (1800 MHz) - Fastest & Popular"
+    override val presetBand3Subtitle = "Telkomsel, Indosat, XL, Tri • Most stable for gaming & streaming"
+    override val presetBand40Title = "Band 40 (2300 MHz TDD) - Orbit / Smartfren"
+    override val presetBand40Subtitle = "Best suited for Telkomsel Orbit & Smartfren Unlimited"
+    override val presetBand1Title = "Band 1 (2100 MHz)"
+    override val presetBand1Subtitle = "Telkomsel, Indosat, XL • Alternative when Band 3 is congested"
+    override val presetBand8Title = "Band 8 (900 MHz) - Longest Range"
+    override val presetBand8Subtitle = "Best wall penetration / rural & suburban areas"
+    override val presetAutoTitle = "Auto Mode (All Bands)"
+    override val presetAutoSubtitle = "Let modem select bands automatically (factory default)"
+    override val carrierAggregationTitle = "Carrier Aggregation (4G+ Combinations)"
+    override val manualBandSelectionTitle = "Manual / Custom Band Selection"
+    override val lockBtn = "Lock"
+    override val customCombinationLabel = "Custom Combination"
+    override val badgeRecommended = "RECOMMENDED"
+    override val badgeDefault = "DEFAULT"
+    override val badgeCoverage = "COVERAGE"
+
+    override fun getBandFrequency(bandNumber: Int, defaultFreq: String): String {
+        return if (bandNumber == 0) "All LTE Bands" else defaultFreq
+    }
+
+    override fun getBandDescription(bandNumber: Int, defaultDesc: String): String {
+        return when (bandNumber) {
+            0 -> "Automatic / default mode"
+            3 -> "Fastest & most popular band in Indonesia"
+            8 -> "Wide coverage (Telkomsel, Indosat, XL)"
+            20 -> "Rural long range"
+            else -> defaultDesc
+        }
+    }
 
     // SMS
     override val smsTitle = "Modem SIM Card SMS"

@@ -144,6 +144,38 @@ object IndonesianStrings : AppStrings {
     override val bandLockSuccessMsg = "Berhasil mengunci ke"
     override val bandLockFailedMsg = "Gagal mengunci band"
     override val selectAtLeastOneBand = "Pilih minimal 1 band frekuensi"
+    override val presetBandsTitle = "Preset Cepat (Rekomendasi Indonesia)"
+    override val presetBand3Title = "Band 3 (1800 MHz) - Tercepat & Populer"
+    override val presetBand3Subtitle = "Telkomsel, Indosat, XL, Tri • Paling stabil untuk gaming & streaming"
+    override val presetBand40Title = "Band 40 (2300 MHz TDD) - Orbit / Smartfren"
+    override val presetBand40Subtitle = "Sangat cocok untuk pengguna Telkomsel Orbit & Smartfren Unlimited"
+    override val presetBand1Title = "Band 1 (2100 MHz)"
+    override val presetBand1Subtitle = "Telkomsel, Indosat, XL • Alternatif jika Band 3 padat"
+    override val presetBand8Title = "Band 8 (900 MHz) - Jangkauan Terjauh"
+    override val presetBand8Subtitle = "Sinyal paling tembus tembok / lokasi pinggiran kota"
+    override val presetAutoTitle = "Mode Auto (Semua Band)"
+    override val presetAutoSubtitle = "Biarkan modem memilih band secara otomatis seperti bawaan pabrik"
+    override val carrierAggregationTitle = "Carrier Aggregation (Kombinasi 4G+)"
+    override val manualBandSelectionTitle = "Pilih Band Manual / Kustom"
+    override val lockBtn = "Kunci"
+    override val customCombinationLabel = "Kombinasi Kustom"
+    override val badgeRecommended = "REKOMENDASI"
+    override val badgeDefault = "DEFAULT"
+    override val badgeCoverage = "JANGKAUAN"
+
+    override fun getBandFrequency(bandNumber: Int, defaultFreq: String): String {
+        return if (bandNumber == 0) "Semua Band LTE" else defaultFreq
+    }
+
+    override fun getBandDescription(bandNumber: Int, defaultDesc: String): String {
+        return when (bandNumber) {
+            0 -> "Mode otomatis / standar"
+            3 -> "Paling Populer & Cepat di Indonesia"
+            8 -> "Jangkauan luas (Telkomsel, Indosat, XL)"
+            20 -> "Jangkauan pedesaan"
+            else -> defaultDesc
+        }
+    }
 
     // SMS
     override val smsTitle = "Pesan SMS Kartu SIM Modem"
