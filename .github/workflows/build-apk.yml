@@ -1,4 +1,4 @@
-name: Build Android Release AAB & APK
+name: "Build Android Release AAB and APK"
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Signed Release AAB & APK
+    name: "Build Signed Release AAB and APK"
     runs-on: ubuntu-latest
 
     steps:
@@ -61,7 +61,7 @@ jobs:
               -dname "CN=HuaManager, OU=RyotaStudio, O=RyotaStudio, L=Mojokerto, ST=East Java, C=ID"
           fi
 
-      - name: Build Signed Release AAB, Release APK & Debug APK
+      - name: "Build Signed Release AAB and APK"
         env:
           STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASS: ${{ secrets.KEY_PASSWORD }}
@@ -82,7 +82,7 @@ jobs:
           tail -n 80 gradle_build.log >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Signed AAB (for Google Play Console)
+      - name: Upload Signed AAB
         uses: actions/upload-artifact@v4
         with:
           name: HuaManager-Release-AAB
@@ -115,8 +115,5 @@ jobs:
             app/build/outputs/apk/release/*.apk \
             app/build/outputs/apk/debug/*.apk \
             --title "HuaManager Play Store Release ($RELEASE_TAG)" \
-            --notes "### 🚀 Paket Rilis HuaManager (Google Play Ready)
-- **HuaManager Release AAB (.aab):** File resmi siap upload ke Google Play Console (Internal / Closed Testing / Production).
-- **HuaManager Release APK (.apk):** APK rilis bertanda tangan resmi untuk pengujian di HP Android.
-- **HuaManager Debug APK (.apk):** APK debug dengan log lengkap untuk pengembang." \
+            --notes "Paket Rilis HuaManager Google Play Store (AAB dan APK release)." \
             || echo "Release creation skipped or already exists."
