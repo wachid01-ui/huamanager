@@ -5,25 +5,27 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
+import com.startapp.sdk.ads.banner.Banner
 
 @Composable
-fun AdmobBanner(
-    modifier: Modifier = Modifier,
-    adUnitId: String = AdsManager.BANNER_AD_UNIT_ID
+fun StartAppBanner(
+    modifier: Modifier = Modifier
 ) {
     AndroidView(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),
         factory = { context ->
-            AdView(context).apply {
-                setAdSize(AdSize.BANNER)
-                this.adUnitId = adUnitId
-                loadAd(AdRequest.Builder().build())
-            }
+            Banner(context)
         }
     )
+}
+
+// Alias agar kompatibel dengan pemanggilan AdmobBanner yang sudah ada
+@Composable
+fun AdmobBanner(
+    modifier: Modifier = Modifier,
+    adUnitId: String = ""
+) {
+    StartAppBanner(modifier = modifier)
 }

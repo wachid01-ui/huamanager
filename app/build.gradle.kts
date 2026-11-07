@@ -92,8 +92,8 @@ dependencies {
     // Networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // Google Mobile Ads (AdMob)
-    implementation("com.google.android.gms:play-services-ads:23.0.0")
+    // Start.io In-App SDK
+    implementation("com.startapp:inapp-sdk:5.4.0")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")

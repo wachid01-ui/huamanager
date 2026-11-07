@@ -5,22 +5,22 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.startapp.sdk.adsbase.Ad
+import com.startapp.sdk.adsbase.StartAppAd
+import com.startapp.sdk.adsbase.adlisteners.AdDisplayListener
+import com.startapp.sdk.adsbase.adlisteners.AdEventListener
+import com.startapp.sdk.adsbase.adlisteners.VideoListener
 
 object AdsManager {
     private const val TAG = "AdsManager"
 
-    // Google AdMob Production Ad Unit IDs
-    const val BANNER_AD_UNIT_ID = "ca-app-pub-7986150590993691/7348826102"
-    const val NATIVE_AD_UNIT_ID = "ca-app-pub-7986150590993691/2096499428"
-    const val REWARDED_AD_UNIT_ID = "ca-app-pub-7986150590993691/5065268538"
+    // Start.io Production App ID
+    const val STARTAPP_APP_ID = "210266488"
 
-    private var rewardedAd: RewardedAd? = null
+    // Ubah ke false jika aplikasi sudah siap dipakai pengguna umum (iklan nyata/live)
+    var IS_TEST_MODE = true
+
+    private var startAppAd: StartAppAd? = null
     private var isAdLoading = false
 
     private val pendingLoadedCallbacks = mutableListOf<() -> Unit>()
@@ -31,7 +31,7 @@ object AdsManager {
         onLoaded: (() -> Unit)? = null,
         onFailed: ((String) -> Unit)? = null
     ) {
-        if (rewardedAd != null) {
+        if (startAppAd?.isReady == true) {
             onLoaded?.invoke()
             return
         }
@@ -40,43 +40,38 @@ object AdsManager {
         if (onFailed != null) pendingFailedCallbacks.add(onFailed)
 
         if (isAdLoading) {
-            Log.d(TAG, "RewardedAd is already loading in background, queued listener.")
+            Log.d(TAG, "Start.io ad is already loading in background, queued listener.")
             return
         }
 
         isAdLoading = true
-        Log.d(TAG, "Requesting new RewardedAd from Google AdMob...")
-        val adRequest = AdRequest.Builder().build()
-        RewardedAd.load(
-            context.applicationContext,
-            REWARDED_AD_UNIT_ID,
-            adRequest,
-            object : RewardedAdLoadCallback() {
-                override fun onAdLoaded(ad: RewardedAd) {
-                    rewardedAd = ad
-                    isAdLoading = false
-                    Log.d(TAG, "RewardedAd successfully loaded and ready to display")
-                    val loaded = ArrayList(pendingLoadedCallbacks)
-                    pendingLoadedCallbacks.clear()
-                    pendingFailedCallbacks.clear()
-                    loaded.forEach { it.invoke() }
-                }
-
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    rewardedAd = null
-                    isAdLoading = false
-                    val errorMsg = "${error.message} (code: ${error.code})"
-                    Log.e(TAG, "Failed to load RewardedAd: $errorMsg")
-                    val failed = ArrayList(pendingFailedCallbacks)
-                    pendingLoadedCallbacks.clear()
-                    pendingFailedCallbacks.clear()
-                    failed.forEach { it.invoke(errorMsg) }
-                }
+        Log.d(TAG, "Requesting new RewardedAd from Start.io...")
+        val ad = StartAppAd(context.applicationContext)
+        ad.loadAd(StartAppAd.AdMode.REWARDED_VIDEO, object : AdEventListener {
+            override fun onReceiveAd(receivedAd: Ad) {
+                startAppAd = ad
+                isAdLoading = false
+                Log.d(TAG, "Start.io RewardedAd successfully loaded and ready to display")
+                val loaded = ArrayList(pendingLoadedCallbacks)
+                pendingLoadedCallbacks.clear()
+                pendingFailedCallbacks.clear()
+                loaded.forEach { it.invoke() }
             }
-        )
+
+            override fun onFailedToReceiveAd(failedAd: Ad?) {
+                startAppAd = null
+                isAdLoading = false
+                val errorMsg = failedAd?.errorMessage ?: "Gagal memuat iklan Start.io"
+                Log.e(TAG, "Failed to load Start.io RewardedAd: $errorMsg")
+                val failed = ArrayList(pendingFailedCallbacks)
+                pendingLoadedCallbacks.clear()
+                pendingFailedCallbacks.clear()
+                failed.forEach { it.invoke(errorMsg) }
+            }
+        })
     }
 
-    fun isRewardedAdReady(): Boolean = rewardedAd != null
+    fun isRewardedAdReady(): Boolean = startAppAd?.isReady == true
 
     fun showRewardedAd(
         activity: Activity,
@@ -84,39 +79,42 @@ object AdsManager {
         onDismissed: (() -> Unit)? = null,
         onFailed: ((String) -> Unit)? = null
     ) {
-        val ad = rewardedAd
-        if (ad != null) {
+        val ad = startAppAd
+        if (ad != null && ad.isReady) {
             var earnedReward = false
 
-            ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdShowedFullScreenContent() {
-                    Log.d(TAG, "RewardedAd opened and displayed full screen")
+            ad.setVideoListener(object : VideoListener {
+                override fun onVideoCompleted() {
+                    Log.d(TAG, "User completed watching Start.io rewarded video")
+                    earnedReward = true
+                    onRewardEarned()
+                }
+            })
+
+            ad.showAd(object : AdDisplayListener {
+                override fun adDisplayed(displayedAd: Ad?) {
+                    Log.d(TAG, "Start.io ad displayed full screen")
                 }
 
-                override fun onAdDismissedFullScreenContent() {
-                    Log.d(TAG, "RewardedAd closed by user")
-                    rewardedAd = null
-                    // Immediately preload the next ad in background so subsequent requests are instant
+                override fun adHidden(hiddenAd: Ad?) {
+                    Log.d(TAG, "Start.io ad closed by user")
+                    startAppAd = null
+                    // Preload iklan berikutnya di background
                     loadRewardedAd(activity.applicationContext)
-
-                    if (earnedReward) {
-                        onRewardEarned()
-                    }
                     onDismissed?.invoke()
                 }
 
-                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                    Log.e(TAG, "RewardedAd failed to show: ${adError.message}")
-                    rewardedAd = null
-                    loadRewardedAd(activity.applicationContext)
-                    onFailed?.invoke(adError.message)
+                override fun adClicked(clickedAd: Ad?) {
+                    Log.d(TAG, "Start.io ad clicked")
                 }
-            }
 
-            ad.show(activity) { rewardItem ->
-                Log.d(TAG, "User earned reward: ${rewardItem.amount} ${rewardItem.type}")
-                earnedReward = true
-            }
+                override fun adNotDisplayed(notDisplayedAd: Ad?) {
+                    Log.e(TAG, "Start.io ad not displayed")
+                    startAppAd = null
+                    loadRewardedAd(activity.applicationContext)
+                    onFailed?.invoke("Iklan tidak dapat ditampilkan.")
+                }
+            })
         } else {
             onFailed?.invoke("Iklan video belum siap di memori.")
         }
@@ -144,7 +142,7 @@ object AdsManager {
             if (!isCompleted) {
                 isCompleted = true
                 Log.w(TAG, "loadAndShowRewardedAd timed out after 12s")
-                onFailed?.invoke("Waktu memuat video habis (koneksi lambat). Silakan periksa koneksi internet.")
+                onFailed?.invoke("Waktu memuat video habis. Silakan periksa koneksi internet.")
             }
         }
         timeoutHandler.postDelayed(timeoutRunnable, 12000L)
