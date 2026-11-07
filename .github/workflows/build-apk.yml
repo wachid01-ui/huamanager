@@ -37,10 +37,13 @@ jobs:
           chmod +x gradlew
 
       - name: Prepare Signing Keystore
-        id: prepare_keystore
         env:
           SECRET_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
+          STORE_PASS="${STORE_PASS:-ryota1116}"
+          KEY_PASS="${KEY_PASS:-ryota1116}"
           if [ -n "$SECRET_KEYSTORE" ]; then
             echo "Using keystore from repository secrets..."
             echo "$SECRET_KEYSTORE" | base64 --decode > huamanager-release.jks
@@ -53,19 +56,22 @@ jobs:
               -keyalg RSA \
               -keysize 2048 \
               -validity 10000 \
-              -storepass "${{ secrets.KEYSTORE_PASSWORD || 'ryota1116' }}" \
-              -keypass "${{ secrets.KEY_PASSWORD || 'ryota1116' }}" \
+              -storepass "$STORE_PASS" \
+              -keypass "$KEY_PASS" \
               -dname "CN=HuaManager, OU=RyotaStudio, O=RyotaStudio, L=Mojokerto, ST=East Java, C=ID"
           fi
 
       - name: Build Signed Release AAB, Release APK & Debug APK
         env:
-          RELEASE_STORE_FILE: ${{ github.workspace }}/huamanager-release.jks
-          RELEASE_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || 'ryota1116' }}
-          RELEASE_KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'huamanager' }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || 'ryota1116' }}
+          STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS_SECRET: ${{ secrets.KEY_ALIAS }}
         run: |
           set -o pipefail
+          export RELEASE_STORE_FILE="${GITHUB_WORKSPACE}/huamanager-release.jks"
+          export RELEASE_STORE_PASSWORD="${STORE_PASS:-ryota1116}"
+          export RELEASE_KEY_ALIAS="${KEY_ALIAS_SECRET:-huamanager}"
+          export RELEASE_KEY_PASSWORD="${KEY_PASS:-ryota1116}"
           ./gradlew bundleRelease assembleRelease assembleDebug --stacktrace 2>&1 | tee gradle_build.log
 
       - name: Publish Build Error Details
