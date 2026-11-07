@@ -92,8 +92,8 @@ dependencies {
     // Networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // Start.io In-App SDK
-    implementation("com.startapp:inapp-sdk:5.4.0")
+    // Start.io In-App SDK (v5.0.2 matches compileSdk 34)
+    implementation("com.startapp:inapp-sdk:5.0.2")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
