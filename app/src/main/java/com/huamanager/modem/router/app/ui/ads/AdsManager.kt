@@ -15,10 +15,10 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 object AdsManager {
     private const val TAG = "AdsManager"
 
-    // Google AdMob Official Test Ad Unit IDs
-    const val BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111"
-    const val NATIVE_AD_UNIT_ID = "ca-app-pub-3940256099942544/2247696110"
-    const val REWARDED_AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917"
+    // Google AdMob Production Ad Unit IDs
+    const val BANNER_AD_UNIT_ID = "ca-app-pub-7986150590993691/7348826102"
+    const val NATIVE_AD_UNIT_ID = "ca-app-pub-7986150590993691/2096499428"
+    const val REWARDED_AD_UNIT_ID = "ca-app-pub-7986150590993691/5065268538"
 
     private var rewardedAd: RewardedAd? = null
     private var isAdLoading = false
