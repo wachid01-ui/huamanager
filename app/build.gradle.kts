@@ -20,9 +20,32 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val storeFilePath = project.findProperty("RELEASE_STORE_FILE") as? String
+                ?: System.getenv("RELEASE_STORE_FILE")
+            if (storeFilePath != null && file(storeFilePath).exists()) {
+                storeFile = file(storeFilePath)
+                storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as? String
+                    ?: System.getenv("RELEASE_STORE_PASSWORD")
+                    ?: "ryota1116"
+                keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as? String
+                    ?: System.getenv("RELEASE_KEY_ALIAS")
+                    ?: "huamanager"
+                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as? String
+                    ?: System.getenv("RELEASE_KEY_PASSWORD")
+                    ?: "ryota1116"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            val releaseSigning = signingConfigs.getByName("release")
+            if (releaseSigning.storeFile != null) {
+                signingConfig = releaseSigning
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
